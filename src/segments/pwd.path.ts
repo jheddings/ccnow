@@ -6,6 +6,6 @@ export const pwdPathSegment: Segment = {
   provider: 'pwd',
   render(context: SegmentContext): string | null {
     const data = context.provider as PwdData | undefined;
-    return data?.path ?? null;
+    return data?.path || null;
   },
 };

@@ -6,6 +6,6 @@ export const pwdSmartSegment: Segment = {
   provider: 'pwd',
   render(context: SegmentContext): string | null {
     const data = context.provider as PwdData | undefined;
-    return data?.smart ?? null;
+    return data?.smart || null;
   },
 };

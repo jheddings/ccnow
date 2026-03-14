@@ -7,7 +7,7 @@ describe('pwd provider', () => {
     const session: SessionData = { cwd: '/Users/jheddings/Projects/ccnow' };
     const data = await pwdProvider.resolve(session) as any;
     expect(data.name).toBe('ccnow');
-    expect(data.path).toBe('/Users/jheddings/Projects/ccnow');
+    expect(data.path).toBe('/Users/jheddings/Projects/');
     expect(data.smart).toBeDefined();
   });
 
@@ -15,47 +15,48 @@ describe('pwd provider', () => {
     const session: SessionData = { cwd: '/' };
     const data = await pwdProvider.resolve(session) as any;
     expect(data.name).toBe('/');
-    expect(data.path).toBe('/');
+    expect(data.path).toBe('');
+    expect(data.smart).toBe('');
   });
 
-  it('smart keeps short paths as-is', async () => {
-    const session: SessionData = { cwd: '/tmp' };
-    const data = await pwdProvider.resolve(session) as any;
-    expect(data.smart).toBe('/tmp');
-  });
-
-  it('smart keeps 3-segment home paths as-is', async () => {
+  it('smart returns prefix only for short home paths', async () => {
     const home = process.env.HOME ?? '/Users/test';
     const session: SessionData = { cwd: `${home}/Projects/ccnow` };
     const data = await pwdProvider.resolve(session) as any;
-    expect(data.smart).toBe('~/Projects/ccnow');
+    expect(data.smart).toBe('~/Projects/');
   });
 
-  it('smart abbreviates 2 middle segments then ellipsis for deep paths', async () => {
-    const home = process.env.HOME ?? '/Users/test';
-    const session: SessionData = { cwd: `${home}/Projects/rise/red/app/routes/virtual-events` };
+  it('smart returns empty for 2-segment paths', async () => {
+    const session: SessionData = { cwd: '/tmp' };
     const data = await pwdProvider.resolve(session) as any;
-    expect(data.smart).toBe('~/P/r/\u2026/virtual-events');
+    expect(data.smart).toBe('/');
   });
 
-  it('smart abbreviates 4-segment home path without ellipsis', async () => {
+  it('smart abbreviates prefix for 4-segment home path', async () => {
     const home = process.env.HOME ?? '/Users/test';
     const session: SessionData = { cwd: `${home}/Projects/rise/red` };
     const data = await pwdProvider.resolve(session) as any;
-    expect(data.smart).toBe('~/P/r/red');
+    expect(data.smart).toBe('~/P/r/');
+  });
+
+  it('smart abbreviates 2 segments then ellipsis for deep paths', async () => {
+    const home = process.env.HOME ?? '/Users/test';
+    const session: SessionData = { cwd: `${home}/Projects/rise/red/app/routes/virtual-events` };
+    const data = await pwdProvider.resolve(session) as any;
+    expect(data.smart).toBe('~/P/r/\u2026/');
   });
 
   it('smart handles 5-segment home path with ellipsis', async () => {
     const home = process.env.HOME ?? '/Users/test';
     const session: SessionData = { cwd: `${home}/Projects/rise/red/app` };
     const data = await pwdProvider.resolve(session) as any;
-    expect(data.smart).toBe('~/P/r/\u2026/app');
+    expect(data.smart).toBe('~/P/r/\u2026/');
   });
 
   it('smart handles absolute non-home deep paths', async () => {
     const session: SessionData = { cwd: '/usr/local/share/some/deep/path' };
     const data = await pwdProvider.resolve(session) as any;
-    expect(data.smart).toBe('/u/l/\u2026/path');
+    expect(data.smart).toBe('/u/l/\u2026/');
   });
 
   it('has correct name', () => {

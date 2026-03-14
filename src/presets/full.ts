@@ -1,11 +1,12 @@
 import {
-  StatusLine, Pwd, Sep, Git, Group, Branch, Insertions, Deletions,
+  StatusLine, Sep, Git, Group, Branch, Insertions, Deletions,
   Context, Tokens, Percent, Literal,
 } from '../dsl/index.js';
 import type { SegmentNode } from '../types.js';
 
 export const fullPreset: SegmentNode[] = StatusLine(() => [
-  Pwd({ style: 'path', color: 'cyan' }),
+  { type: 'pwd.path', provider: 'pwd', style: { color: '#00afff' } },
+  { type: 'pwd.name', provider: 'pwd', style: { color: '#00afff', bold: true } },
   Sep({ char: '|', dim: true }),
   Git()(() => [
     Branch({ color: 'whiteBright', bold: true, icon: '\ue0a0 ' }),

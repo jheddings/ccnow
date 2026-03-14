@@ -1,32 +1,33 @@
 import {
-  Pwd, Sep, Git, Group, Branch, Insertions, Deletions,
+  Sep, Git, Group, Branch, Insertions, Deletions,
   Context, Tokens, Percent, Literal,
 } from './dsl/index.js';
 import type { SegmentNode } from './types.js';
 
-type CompositeBuilder = (sepChar: string) => SegmentNode;
+type CompositeBuilder = (sepChar: string) => SegmentNode[];
 
 const compositeBuilders: Record<string, CompositeBuilder> = {
-  pwd: () => Pwd({ color: 'cyan' }),
-  sep: (sepChar) => Sep({ char: sepChar, dim: true }),
-  git: () => Git()(() => [
+  pwd: () => [
+    { type: 'pwd.smart', provider: 'pwd', style: { color: '#00afff' } },
+    { type: 'pwd.name', provider: 'pwd', style: { color: '#00afff', bold: true } },
+  ],
+  sep: (sepChar) => [Sep({ char: sepChar, dim: true })],
+  git: () => [Git()(() => [
     Branch({ color: 'whiteBright', bold: true, icon: '\ue0a0 ' }),
     Group({ prefix: ' [', suffix: ']' })(() => [
       Insertions({ color: 'green', prefix: '+' }),
       Deletions({ color: 'red', prefix: ' -' }),
     ]),
-  ]),
-  context: () => Context()(() => [
+  ])],
+  context: () => [Context()(() => [
     Literal({ text: 'ctx: ' }),
     Tokens({ bold: true }),
     Literal({ text: ' (' }),
     Percent(),
     Literal({ text: ')' }),
-  ]),
+  ])],
 };
 
 export function buildCompositeTree(segments: string[], sepChar: string = '|'): SegmentNode[] {
-  return segments
-    .map((name) => compositeBuilders[name]?.(sepChar))
-    .filter((node): node is SegmentNode => node !== undefined);
+  return segments.flatMap((name) => compositeBuilders[name]?.(sepChar) ?? []);
 }

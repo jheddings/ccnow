@@ -4,13 +4,15 @@ import type { DataProvider, SessionData } from '../types.js';
 
 export interface PwdData {
   name: string;
-  path: string;
-  smart: string;
+  path: string;   // full prefix path (without basename), e.g. '/Users/test/'
+  smart: string;  // smart-truncated prefix (without basename), e.g. '~/t/'
 }
 
 const MAX_ABBREVIATED = 2;
 
-function smartTruncate(cwd: string): string {
+function smartPrefix(cwd: string): string {
+  if (cwd === '/') return '';
+
   const home = os.homedir();
   let p = cwd;
 
@@ -20,33 +22,36 @@ function smartTruncate(cwd: string): string {
   }
 
   const parts = p.split('/');
-  // 3 or fewer segments (e.g. ~/Projects/ccnow) — keep as-is
-  if (parts.length <= 3) return p;
+  // 2 segments (e.g. /tmp) — just the leading slash
+  if (parts.length <= 2) return parts[0] + '/';
 
   const first = parts[0]; // '' for absolute, '~' for home-relative
-  const last = parts[parts.length - 1];
   const middle = parts.slice(1, -1);
+
+  // 3 segments (e.g. ~/Projects/ccnow) — keep prefix as-is
+  if (parts.length <= 3) return first + '/' + middle.join('/') + '/';
 
   // Abbreviate up to MAX_ABBREVIATED middle segments, then ellipsis if more remain
   if (middle.length <= MAX_ABBREVIATED) {
-    // All middle segments fit as abbreviations (e.g. ~/P/r/red)
     const abbreviated = middle.map((part) => part[0] ?? '');
-    return [first, ...abbreviated, last].join('/');
+    return [first, ...abbreviated, ''].join('/');
   }
 
-  // More than MAX_ABBREVIATED middle segments — abbreviate first 2, then …
   const abbreviated = middle.slice(0, MAX_ABBREVIATED).map((part) => part[0] ?? '');
-  return [first, ...abbreviated, '\u2026', last].join('/');
+  return [first, ...abbreviated, '\u2026', ''].join('/');
 }
 
 export const pwdProvider: DataProvider = {
   name: 'pwd',
   async resolve(session: SessionData): Promise<PwdData> {
     const cwd = session.cwd;
+    const name = cwd === '/' ? '/' : path.basename(cwd);
+    const fullPrefix = cwd === '/' ? '' : path.dirname(cwd) + '/';
+
     return {
-      name: cwd === '/' ? '/' : path.basename(cwd),
-      path: cwd,
-      smart: smartTruncate(cwd),
+      name,
+      path: fullPrefix,
+      smart: smartPrefix(cwd),
     };
   },
 };
