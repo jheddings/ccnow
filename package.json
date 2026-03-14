@@ -8,7 +8,7 @@
     "ccnow": "dist/cli.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && chmod +x dist/cli.js",
     "test": "NODE_OPTIONS='--experimental-vm-modules' jest",
     "prepare": "husky"
   },
