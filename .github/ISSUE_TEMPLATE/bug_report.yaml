@@ -1,0 +1,85 @@
+name: Bug Report
+description: Report a bug or unexpected behavior
+title: '[Bug]: '
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this bug! Please fill out the sections below to help us understand and fix the issue.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Provide a clear and concise description of what the bug is.
+      placeholder: |
+        Example: The statusline shows empty brackets when there are no git changes.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: Tell us how to reproduce this issue. Be as specific as possible.
+      placeholder: |
+        1. Configure ccnow as your statusline
+        2. Open a Claude Code session in a non-git directory
+        3. Notice the statusline shows '| |' instead of collapsing
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+      description: Describe what you expected to happen instead.
+      placeholder: |
+        Example: The git section should collapse and not show empty separators.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: What actually happened?
+      description: Describe what actually happened. Include any error messages or statusline output.
+      placeholder: |
+        Example: The statusline showed 'ccnow | | ctx: 42K (42%)' with empty separators.
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: If applicable, add screenshots of the statusline output. You can drag and drop images here.
+      placeholder: Drag and drop images here or paste them.
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment Information
+      description: Help us understand your setup
+      placeholder: |
+        - ccnow version: [e.g., 0.1.0]
+        - Claude Code version: [e.g., 2.1.75]
+        - Terminal: [e.g., iTerm2, Terminal.app, Kitty]
+        - OS: [e.g., macOS 15, Ubuntu 24.04]
+        - Preset: [e.g., default, minimal, full, custom config]
+      value: |
+        - ccnow version:
+        - Claude Code version:
+        - Terminal:
+        - OS:
+        - Preset:
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: |
+        Add any other context about the problem here. Include your statusline
+        config from settings.json if relevant, or the output of --tee if available.
+      placeholder: Any additional information that might help us fix this bug.
