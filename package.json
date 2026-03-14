@@ -1,7 +1,7 @@
 {
   "name": "ccnow",
-  "version": "0.1.0",
-  "description": "Composable, spaceship-style statusline for Claude Code",
+  "version": "0.0.1",
+  "description": "Composable, spaceship-inspired status line for Claude Code",
   "type": "module",
   "main": "dist/cli.js",
   "bin": {
