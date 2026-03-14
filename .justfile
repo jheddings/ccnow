@@ -33,6 +33,21 @@ check:
 # full preflight: build + check + test
 preflight: build check test
 
+# preview release notes since the last tag (or for a given range)
+notes tag="--unreleased":
+	npx git-cliff {{tag}}
+
+# bump version, preflight, commit, tag, and push
+release bump="patch": preflight
+	#!/usr/bin/env bash
+	npm version {{bump}} --no-git-tag-version
+	VERSION=$(node -p "require('./package.json').version")
+	npx prettier --write package.json package-lock.json
+	git add package.json package-lock.json
+	git commit -m "ccnow-$VERSION"
+	git tag -a "v$VERSION" -m "v$VERSION"
+	git push && git push --tags
+
 # remove build artifacts
 clean:
 	rm -rf dist
