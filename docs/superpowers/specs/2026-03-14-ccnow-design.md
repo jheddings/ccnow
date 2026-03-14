@@ -53,7 +53,7 @@ interface SegmentNode {
   children?: SegmentNode[];                  // composites only
 }
 
-type EnabledFn = (session: SessionData, provider?: unknown) => boolean;
+type EnabledFn = (session: SessionData) => boolean;
 ```
 
 - **Atomic segments** return a raw value string from `render()`. The runner applies styling.
@@ -61,23 +61,32 @@ type EnabledFn = (session: SessionData, provider?: unknown) => boolean;
 - **Literal segments** output static text. No provider, no data.
 - **Separator segments** output a styled character (pipe, arrow, space, etc.).
 
-### Segment Interface
+### Segment Registry and Runtime
+
+`SegmentNode` is the **configuration** — it describes what to render and how it should look. `Segment` is the **runtime behavior** — it knows how to produce a value. A segment registry maps `SegmentNode.type` strings to `Segment` implementations.
 
 ```ts
 interface Segment {
-  name: string;
-  provider?: string;
+  name: string;           // matches SegmentNode.type, e.g. 'git.branch'
+  provider?: string;      // e.g. 'git'
   render(context: SegmentContext): string | null;
 }
 
 interface SegmentContext {
   session: SessionData;
-  provider?: unknown;
-  config?: SegmentConfig;
+  provider?: unknown;     // cached data from the declared provider
+  props?: Record<string, unknown>;  // from SegmentNode.props (text, char, etc.)
 }
 ```
 
-Segments return a raw value string or `null` (nothing to show, error, or `enabled` evaluated to false). The runner wraps the value with style attributes. This separates data logic from presentation.
+At render time, the runner:
+1. Looks up the `Segment` implementation by `SegmentNode.type` from the registry
+2. Evaluates `SegmentNode.enabled` — if false, skips entirely (never calls `render()`)
+3. Builds a `SegmentContext` with session data, cached provider data (if declared), and the node's `props`
+4. Calls `segment.render(context)` — returns raw value string or `null`
+5. Applies `SegmentNode.style` attrs to the value via chalk
+
+Segments return a raw value string or `null` (nothing to show, no data available). The runner owns all conditional (`enabled`) and styling logic. This separates data logic from presentation.
 
 ### Style Attributes
 
@@ -106,20 +115,43 @@ interface DataProvider {
 
 Providers fetch and cache data for segments. Called once per run, result shared across all segments that declare the provider. If `resolve` throws, all dependent segments render as null (fail silent).
 
+Session data is parsed from stdin and passed to every segment as `SegmentContext.session`. It is **not** a DataProvider — it is the pipeline input, always available. Providers are additional data sources beyond the session JSON.
+
+**Provider resolution:** The runner walks the render tree, collects unique provider names from all enabled segments, resolves them concurrently via `Promise.all`, and stores results in a `Map<string, unknown>`. Each segment's `SegmentContext.provider` is populated from this map by its declared provider name.
+
 **Built-in providers:**
 
 | Provider | Source | Data |
 |----------|--------|------|
-| `session` | stdin JSON (always available) | cwd, context_window, etc. |
 | `git` | git CLI commands against `session.cwd` | branch, insertions, deletions |
 | `pwd` | derived from `session.cwd` | name, path, smart-truncated path |
 | `context` | derived from session JSON | token count (formatted), percentage |
 
-Session data is the base context passed to every segment automatically. Segments declare an additional provider only if they need data beyond the session JSON. Providers are resolved lazily — only activated if an enabled segment declares them. Async providers run concurrently via `Promise.all`.
+Providers are resolved lazily — only activated if an enabled segment declares them.
+
+### Session Data Shape
+
+The session JSON is piped by Claude Code on stdin. Known fields:
+
+```ts
+interface SessionData {
+  cwd: string;
+  context_window?: {
+    used_percentage: number;
+    current_usage?: {
+      input_tokens: number;
+      cache_creation_input_tokens: number;
+      cache_read_input_tokens: number;
+    };
+  };
+}
+```
+
+Additional fields may be present. Segments and providers should access fields defensively — missing fields should result in `null` output, not errors.
 
 ## Data Flow
 
-1. **Parse CLI** — resolve preset name, segment toggles, config file path, output format, tee path
+1. **Parse CLI** — resolve preset name, segment toggles, config file path, output format (ansi or plain), tee path
 2. **Load render tree** — CLI flags, JSON config, or preset DSL → all produce a `SegmentNode` tree
 3. **Read stdin** — parse Claude Code session JSON
 4. **Tee** (if `--tee` flag) — write raw stdin JSON to file before processing
@@ -155,32 +187,62 @@ npx -y ccnow --format=plain
 npx -y ccnow --tee /tmp/session.json
 ```
 
+**CLI flag ordering:** Standard arg parsers (minimist, commander) return flags as a map, losing positional order. To preserve flag order for layout composition, the CLI parses `process.argv` directly to extract segment flags in order, then uses a standard parser for value flags (`--preset`, `--config`, `--format`, `--tee`). Duplicate segment flags are allowed — `--sep --sep` produces two separators. Duplicate composites like `--git --git` are deduplicated.
+
 **JSON config** — serialized render tree for customization without writing code:
 
 ```json
 {
   "segments": [
-    { "segment": "pwd.smart", "color": "cyan", "bold": true },
-    { "segment": "sep", "char": "|", "dim": true },
-    { "segment": "git", "children": [
-      { "segment": "git.branch", "color": "white", "icon": "\ue0a0 " },
-      { "segment": "literal", "text": " [" },
-      { "segment": "git.insertions", "color": "green", "prefix": "+" },
-      { "segment": "literal", "text": " " },
-      { "segment": "git.deletions", "color": "red", "prefix": "-" },
-      { "segment": "literal", "text": "]" }
-    ]},
-    { "segment": "sep", "char": "|", "dim": true },
-    { "segment": "context", "children": [
-      { "segment": "literal", "text": "ctx: " },
-      { "segment": "context.tokens", "bold": true },
-      { "segment": "literal", "text": " (" },
-      { "segment": "context.percent" },
-      { "segment": "literal", "text": ")" }
-    ]}
+    {
+      "segment": "pwd.smart",
+      "style": { "color": "cyan", "bold": true }
+    },
+    {
+      "segment": "sep",
+      "props": { "char": "|" },
+      "style": { "dim": true }
+    },
+    {
+      "segment": "git",
+      "children": [
+        {
+          "segment": "git.branch",
+          "style": { "color": "white", "icon": "\ue0a0 " }
+        },
+        { "segment": "literal", "props": { "text": " [" } },
+        {
+          "segment": "git.insertions",
+          "style": { "color": "green", "prefix": "+" }
+        },
+        { "segment": "literal", "props": { "text": " " } },
+        {
+          "segment": "git.deletions",
+          "style": { "color": "red", "prefix": "-" }
+        },
+        { "segment": "literal", "props": { "text": "]" } }
+      ]
+    },
+    {
+      "segment": "sep",
+      "props": { "char": "|" },
+      "style": { "dim": true }
+    },
+    {
+      "segment": "context",
+      "children": [
+        { "segment": "literal", "props": { "text": "ctx: " } },
+        { "segment": "context.tokens", "style": { "bold": true } },
+        { "segment": "literal", "props": { "text": " (" } },
+        { "segment": "context.percent" },
+        { "segment": "literal", "props": { "text": ")" } }
+      ]
+    }
   ]
 }
 ```
+
+The JSON structure mirrors `SegmentNode` directly: `segment` maps to `type`, `style` maps to `StyleAttrs`, `props` maps to segment-specific data, `children` for composites. An `enabled` field (boolean only in JSON) can be added to any segment or composite.
 
 **DSL** — internal authoring format for presets, future power-user configs:
 
@@ -221,7 +283,7 @@ CLI flags > config file > preset > built-in default
 Segments and composites use `enabled` for conditional display:
 
 - `true` / `false` — static enable/disable (JSON and DSL)
-- Function `(session, provider?) => boolean` — dynamic condition (DSL only)
+- Function `(session) => boolean` — dynamic condition (DSL only)
 
 Built-in composites ship with sensible defaults (e.g. `Git` checks for git repo availability). Atomic segments return `null` when they have no data, which effectively hides them.
 
@@ -273,7 +335,7 @@ Options:
   --git               Enable git composite segment
   --context           Enable context composite segment
   --sep               Insert separator segment
-  --format <type>     Output format: ansi (default), plain, json
+  --format <type>     Output format: ansi (default), plain
   --tee <path>        Write raw stdin JSON to file before processing
   --help              Show help
   --version           Show version
@@ -292,8 +354,8 @@ ccnow/
     runner.ts           # Pipeline orchestrator
     render.ts           # Tree traversal, styling, output
     types.ts            # Shared interfaces
+    session.ts          # Parses stdin JSON into SessionData (base context)
     providers/
-      session.ts        # Parses stdin JSON (base context)
       git.ts            # Git CLI commands
       pwd.ts            # Working directory variants
       context.ts        # Token count, percentage formatting
@@ -326,6 +388,7 @@ ccnow/
 - **Provider failure**: if a provider's `resolve` throws, all dependent segments render as `null`
 - **Composite collapse**: if all children of a composite are `null`, the composite is `null` (no orphaned separators or literals)
 - **Stdin failure**: if stdin is empty or invalid JSON, fall back to a minimal output or exit cleanly
+- **Tee failure**: if `--tee` write fails (bad path, permissions), warn to stderr and continue rendering
 - **Performance**: target sub-50ms execution. Providers resolve concurrently. Git commands use `session.cwd` to avoid filesystem discovery.
 
 ## Dependencies
@@ -342,4 +405,4 @@ No other runtime dependencies. Keep the package small for `npx` cold-start perfo
 - `when` conditions in JSON (expression-based conditional display)
 - Interactive config builder CLI
 - Icon theme presets (powerline, nerd-font, ascii)
-- `pwd.smart` truncation strategies (p10k-style)
+- `pwd.smart` configurable truncation strategies (v1 ships with a single hardcoded strategy)
