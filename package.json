@@ -1,0 +1,29 @@
+{
+  "name": "ccnow",
+  "version": "0.1.0",
+  "description": "Composable, spaceship-style statusline for Claude Code",
+  "type": "module",
+  "main": "dist/cli.js",
+  "bin": {
+    "ccnow": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "NODE_OPTIONS='--experimental-vm-modules' jest"
+  },
+  "keywords": ["claude", "claude-code", "statusline", "cli"],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.0.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.0",
+    "typescript": "^5.5.0"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0"
+  }
+}
