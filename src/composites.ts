@@ -1,5 +1,5 @@
 import {
-  Pwd, Sep, Git, Branch, Insertions, Deletions,
+  Pwd, Sep, Git, Group, Branch, Insertions, Deletions,
   Context, Tokens, Percent, Literal,
 } from './dsl/index.js';
 import type { SegmentNode } from './types.js';
@@ -11,11 +11,10 @@ const compositeBuilders: Record<string, CompositeBuilder> = {
   sep: (sepChar) => Sep({ char: sepChar, dim: true }),
   git: () => Git()(() => [
     Branch({ color: 'white', bold: true, icon: '\ue0a0 ' }),
-    Literal({ text: ' [' }),
-    Insertions({ color: 'green', prefix: '+' }),
-    Literal({ text: ' ' }),
-    Deletions({ color: 'red', prefix: '-' }),
-    Literal({ text: ']' }),
+    Group({ prefix: ' [', suffix: ']' })(() => [
+      Insertions({ color: 'green', prefix: '+' }),
+      Deletions({ color: 'red', prefix: ' -' }),
+    ]),
   ]),
   context: () => Context()(() => [
     Literal({ text: 'ctx: ' }),

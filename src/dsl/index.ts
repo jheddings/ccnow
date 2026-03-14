@@ -98,6 +98,16 @@ export function Context(props: CompositeProps = {}): (children: () => SegmentNod
   });
 }
 
+export function Group(props: CompositeProps = {}): (children: () => SegmentNode[]) => SegmentNode {
+  const { enabled, ...styleProps } = props;
+  return (children) => ({
+    type: 'group',
+    enabled,
+    style: extractStyle(styleProps),
+    children: children(),
+  });
+}
+
 export function StatusLine(children: () => SegmentNode[]): SegmentNode[] {
   return children();
 }

@@ -1,5 +1,5 @@
 import {
-  StatusLine, Pwd, Sep, Git, Branch, Insertions, Deletions,
+  StatusLine, Pwd, Sep, Git, Group, Branch, Insertions, Deletions,
   Context, Tokens, Percent, Literal,
 } from '../dsl/index.js';
 import type { SegmentNode } from '../types.js';
@@ -9,11 +9,10 @@ export const fullPreset: SegmentNode[] = StatusLine(() => [
   Sep({ char: '|', dim: true }),
   Git()(() => [
     Branch({ color: 'white', bold: true, icon: '\ue0a0 ' }),
-    Literal({ text: ' [' }),
-    Insertions({ color: 'green', prefix: '+' }),
-    Literal({ text: ' ' }),
-    Deletions({ color: 'red', prefix: '-' }),
-    Literal({ text: ']' }),
+    Group({ prefix: ' [', suffix: ']' })(() => [
+      Insertions({ color: 'green', prefix: '+' }),
+      Deletions({ color: 'red', prefix: ' -' }),
+    ]),
   ]),
   Sep({ char: '|', dim: true }),
   Context()(() => [
