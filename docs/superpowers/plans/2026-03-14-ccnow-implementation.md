@@ -19,7 +19,7 @@ ccnow/
   package.json            # Package manifest, bin entry, dependencies
   tsconfig.json           # TypeScript compiler config
   jest.config.ts          # Jest config for TS
-  justfile                # Project lifecycle (build, test, lint, clean)
+  .justfile               # Project lifecycle (build, test, lint, clean)
   README.md               # (exists)
   src/
     cli.ts                # Entry point: read stdin, parse args, run pipeline
