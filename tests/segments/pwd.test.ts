@@ -8,7 +8,7 @@ const session: SessionData = { cwd: '/Users/test/project' };
 
 describe('pwd.name segment', () => {
   it('returns directory name from provider data', () => {
-    const provider = { name: 'project', path: '/Users/test/', smart: '~/t/' };
+    const provider = { name: 'project', path: '/Users/test', smart: '~/t' };
     expect(pwdNameSegment.render({ session, provider })).toBe('project');
   });
 
@@ -23,8 +23,8 @@ describe('pwd.name segment', () => {
 
 describe('pwd.path segment', () => {
   it('returns path prefix from provider data', () => {
-    const provider = { name: 'project', path: '/Users/test/', smart: '~/t/' };
-    expect(pwdPathSegment.render({ session, provider })).toBe('/Users/test/');
+    const provider = { name: 'project', path: '/Users/test', smart: '~/t' };
+    expect(pwdPathSegment.render({ session, provider })).toBe('/Users/test');
   });
 
   it('returns null when path is empty (root dir)', () => {
@@ -35,8 +35,8 @@ describe('pwd.path segment', () => {
 
 describe('pwd.smart segment', () => {
   it('returns smart-truncated prefix from provider data', () => {
-    const provider = { name: 'project', path: '/Users/test/', smart: '~/t/' };
-    expect(pwdSmartSegment.render({ session, provider })).toBe('~/t/');
+    const provider = { name: 'project', path: '/Users/test', smart: '~/t' };
+    expect(pwdSmartSegment.render({ session, provider })).toBe('~/t');
   });
 
   it('returns null when smart is empty (root dir)', () => {

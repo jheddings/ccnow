@@ -5,7 +5,7 @@ import {
 import type { SegmentNode } from '../types.js';
 
 export const defaultPreset: SegmentNode[] = StatusLine(() => [
-  { type: 'pwd.smart', provider: 'pwd', style: { color: '31' } },
+  { type: 'pwd.smart', provider: 'pwd', style: { color: '31', suffix: '/' } },
   { type: 'pwd.name', provider: 'pwd', style: { color: '39', bold: true } },
   Sep({ char: '|', color: '240' }),
   Git()(() => [

@@ -50,6 +50,7 @@ describe('applyStyle', () => {
     expect(result).toBe('\x1b[0m\x1b[31mhello\x1b[0m');
   });
 
+
   it('combines multiple style attrs', () => {
     const style: StyleAttrs = { color: 'green', bold: true, prefix: '+' };
     const result = applyStyle('12', style);
