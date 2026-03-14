@@ -2,6 +2,7 @@ export interface SessionData {
   cwd: string;
   context_window?: {
     used_percentage: number;
+    context_window_size?: number;
     current_usage?: {
       input_tokens: number;
       cache_creation_input_tokens: number;

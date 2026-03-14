@@ -73,6 +73,11 @@ export function Tokens(props: BaseProps = {}): SegmentNode {
   return { type: 'context.tokens', provider: 'context', enabled, style: extractStyle(styleProps) };
 }
 
+export function Size(props: BaseProps = {}): SegmentNode {
+  const { enabled, ...styleProps } = props;
+  return { type: 'context.size', provider: 'context', enabled, style: extractStyle(styleProps) };
+}
+
 export function Percent(props: BaseProps = {}): SegmentNode {
   const { enabled, ...styleProps } = props;
   return { type: 'context.percent', provider: 'context', enabled, style: extractStyle(styleProps) };

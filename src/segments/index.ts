@@ -8,6 +8,7 @@ import { gitBranchSegment } from './git.branch.js';
 import { gitInsertionsSegment } from './git.insertions.js';
 import { gitDeletionsSegment } from './git.deletions.js';
 import { contextTokensSegment } from './context.tokens.js';
+import { contextSizeSegment } from './context.size.js';
 import { contextPercentSegment } from './context.percent.js';
 
 export function registerBuiltinSegments(registry: SegmentRegistry): void {
@@ -20,5 +21,6 @@ export function registerBuiltinSegments(registry: SegmentRegistry): void {
   registry.register(gitInsertionsSegment);
   registry.register(gitDeletionsSegment);
   registry.register(contextTokensSegment);
+  registry.register(contextSizeSegment);
   registry.register(contextPercentSegment);
 }

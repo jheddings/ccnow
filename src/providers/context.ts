@@ -2,6 +2,7 @@ import type { DataProvider, SessionData } from '../types.js';
 
 export interface ContextData {
   tokens: string | null;
+  size: string | null;
   percent: number | null;
 }
 
@@ -20,7 +21,7 @@ export const contextProvider: DataProvider = {
   async resolve(session: SessionData): Promise<ContextData> {
     const cw = session.context_window;
     if (!cw) {
-      return { tokens: null, percent: null };
+      return { tokens: null, size: null, percent: null };
     }
 
     const usage = cw.current_usage;
@@ -34,6 +35,7 @@ export const contextProvider: DataProvider = {
 
     return {
       tokens: usage ? formatTokens(totalTokens) : null,
+      size: cw.context_window_size ? formatTokens(cw.context_window_size) : null,
       percent: cw.used_percentage ?? null,
     };
   },
