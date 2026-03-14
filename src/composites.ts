@@ -7,10 +7,10 @@ import type { SegmentNode } from './types.js';
 type CompositeBuilder = (sepChar: string) => SegmentNode;
 
 const compositeBuilders: Record<string, CompositeBuilder> = {
-  pwd: () => Pwd({ color: 'cyan', bold: true }),
+  pwd: () => Pwd({ color: 'cyan' }),
   sep: (sepChar) => Sep({ char: sepChar, dim: true }),
   git: () => Git()(() => [
-    Branch({ color: 'white', bold: true, icon: '\ue0a0 ' }),
+    Branch({ color: 'whiteBright', bold: true, icon: '\ue0a0 ' }),
     Group({ prefix: ' [', suffix: ']' })(() => [
       Insertions({ color: 'green', prefix: '+' }),
       Deletions({ color: 'red', prefix: ' -' }),

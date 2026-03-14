@@ -5,10 +5,10 @@ import {
 import type { SegmentNode } from '../types.js';
 
 export const fullPreset: SegmentNode[] = StatusLine(() => [
-  Pwd({ style: 'path', color: 'cyan', bold: true }),
+  Pwd({ style: 'path', color: 'cyan' }),
   Sep({ char: '|', dim: true }),
   Git()(() => [
-    Branch({ color: 'white', bold: true, icon: '\ue0a0 ' }),
+    Branch({ color: 'whiteBright', bold: true, icon: '\ue0a0 ' }),
     Group({ prefix: ' [', suffix: ']' })(() => [
       Insertions({ color: 'green', prefix: '+' }),
       Deletions({ color: 'red', prefix: ' -' }),
