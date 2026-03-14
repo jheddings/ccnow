@@ -15,7 +15,8 @@ export function extractStyle(props: Partial<StyleAttrs>): StyleAttrs | undefined
   let hasStyle = false;
   for (const key of ['color', 'bold', 'italic', 'prefix', 'suffix'] as const) {
     if (props[key] !== undefined) {
-      (style as any)[key] = props[key];
+      const styleRecord = style as Record<string, unknown>;
+      styleRecord[key] = props[key];
       hasStyle = true;
     }
   }

@@ -10,6 +10,7 @@ import {
   ContextTokens,
   ContextPercent,
 } from '../../src/dsl/index.js';
+import type { SessionData } from '../../src/types.js';
 
 describe('DSL factory functions', () => {
   it('Literal creates a literal node', () => {
@@ -52,7 +53,7 @@ describe('DSL factory functions', () => {
   });
 
   it('GitGroup accepts enabled function', () => {
-    const enabledFn = (s: any) => s.cwd !== '';
+    const enabledFn = (s: SessionData) => s.cwd !== '';
     const node = GitGroup({ enabled: enabledFn })(() => [GitBranch()]);
     expect(typeof node.enabled).toBe('function');
   });

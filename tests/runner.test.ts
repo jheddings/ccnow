@@ -23,6 +23,7 @@ describe('run', () => {
   it('renders plain format without ANSI codes', async () => {
     const input = JSON.stringify({ cwd: '/tmp' });
     const output = await run({ preset: 'minimal', format: 'plain' }, input);
+    // eslint-disable-next-line no-control-regex
     expect(output).not.toMatch(/\x1b\[/);
   });
 

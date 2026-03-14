@@ -1,5 +1,5 @@
 import { describe, it, expect } from '@jest/globals';
-import { parseArgs, type CliArgs } from '../src/cli-parser.js';
+import { parseArgs } from '../src/cli-parser.js';
 
 describe('parseArgs', () => {
   it('returns defaults when no args', () => {

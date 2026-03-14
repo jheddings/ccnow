@@ -4,7 +4,7 @@ import type { Segment, SegmentContext } from '../src/types.js';
 
 const mockSegment: Segment = {
   name: 'test.seg',
-  render: (ctx: SegmentContext) => 'hello',
+  render: (_ctx: SegmentContext) => 'hello',
 };
 
 describe('SegmentRegistry', () => {
@@ -33,6 +33,6 @@ describe('SegmentRegistry', () => {
     const replacement: Segment = { name: 'test.seg', render: () => 'replaced' };
     reg.register(mockSegment);
     reg.register(replacement);
-    expect(reg.get('test.seg')?.render({} as any)).toBe('replaced');
+    expect(reg.get('test.seg')?.render({ session: { cwd: '' } })).toBe('replaced');
   });
 });

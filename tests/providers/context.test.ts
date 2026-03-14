@@ -1,5 +1,6 @@
 import { describe, it, expect } from '@jest/globals';
 import { contextProvider } from '../../src/providers/context.js';
+import type { ContextData } from '../../src/providers/context.js';
 import type { SessionData } from '../../src/types.js';
 
 describe('context provider', () => {
@@ -15,7 +16,7 @@ describe('context provider', () => {
         },
       },
     };
-    const data = (await contextProvider.resolve(session)) as any;
+    const data = (await contextProvider.resolve(session)) as ContextData;
     expect(data.tokens).toBe('42K');
     expect(data.percent).toBe(42);
   });
@@ -32,7 +33,7 @@ describe('context provider', () => {
         },
       },
     };
-    const data = (await contextProvider.resolve(session)) as any;
+    const data = (await contextProvider.resolve(session)) as ContextData;
     expect(data.tokens).toBe('1.2M');
   });
 
@@ -48,13 +49,13 @@ describe('context provider', () => {
         },
       },
     };
-    const data = (await contextProvider.resolve(session)) as any;
+    const data = (await contextProvider.resolve(session)) as ContextData;
     expect(data.tokens).toBe('500');
   });
 
   it('returns null fields when context_window missing', async () => {
     const session: SessionData = { cwd: '/tmp' };
-    const data = (await contextProvider.resolve(session)) as any;
+    const data = (await contextProvider.resolve(session)) as ContextData;
     expect(data.tokens).toBeNull();
     expect(data.percent).toBeNull();
   });

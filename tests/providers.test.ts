@@ -1,4 +1,4 @@
-import { describe, it, expect, jest } from '@jest/globals';
+import { describe, it, expect } from '@jest/globals';
 import { ProviderRegistry } from '../src/providers.js';
 import type { DataProvider, SessionData, SegmentNode } from '../src/types.js';
 

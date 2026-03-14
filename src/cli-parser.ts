@@ -14,6 +14,7 @@ export function parseArgs(argv: string[]): CliArgs {
     preset: 'default',
     format: 'ansi',
   };
+  const resultRecord = result as unknown as Record<string, unknown>;
 
   let i = 0;
 
@@ -37,7 +38,7 @@ export function parseArgs(argv: string[]): CliArgs {
     if (eqMatch) {
       const [, key, value] = eqMatch;
       if (VALUE_FLAGS.has(key)) {
-        (result as any)[key] = value;
+        resultRecord[key] = value;
       }
       i++;
       continue;
@@ -51,7 +52,7 @@ export function parseArgs(argv: string[]): CliArgs {
       if (VALUE_FLAGS.has(key)) {
         const value = argv[i + 1];
         if (value !== undefined) {
-          (result as any)[key] = value;
+          resultRecord[key] = value;
           i += 2;
           continue;
         }

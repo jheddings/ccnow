@@ -1,5 +1,6 @@
 import { describe, it, expect } from '@jest/globals';
 import { gitProvider, gitAvailable } from '../../src/providers/git.js';
+import type { GitData } from '../../src/providers/git.js';
 import type { SessionData } from '../../src/types.js';
 
 describe('gitAvailable', () => {
@@ -18,14 +19,14 @@ describe('gitAvailable', () => {
 describe('git provider', () => {
   it('resolves branch name for a git repo', async () => {
     const session: SessionData = { cwd: process.cwd() };
-    const data = (await gitProvider.resolve(session)) as any;
+    const data = (await gitProvider.resolve(session)) as GitData;
     expect(typeof data.branch).toBe('string');
-    expect(data.branch.length).toBeGreaterThan(0);
+    expect(data.branch?.length).toBeGreaterThan(0);
   });
 
   it('returns null fields for non-git directory', async () => {
     const session: SessionData = { cwd: '/tmp' };
-    const data = (await gitProvider.resolve(session)) as any;
+    const data = (await gitProvider.resolve(session)) as GitData;
     expect(data.branch).toBeNull();
     expect(data.insertions).toBeNull();
     expect(data.deletions).toBeNull();

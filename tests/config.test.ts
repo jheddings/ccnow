@@ -1,6 +1,5 @@
 import { describe, it, expect } from '@jest/globals';
 import { parseConfig } from '../src/config.js';
-import type { SegmentNode } from '../src/types.js';
 
 describe('parseConfig', () => {
   it('parses a simple segment list', () => {

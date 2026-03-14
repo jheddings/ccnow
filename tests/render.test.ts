@@ -2,6 +2,7 @@ import { describe, it, expect } from '@jest/globals';
 import { renderTree } from '../src/render.js';
 import { SegmentRegistry } from '../src/registry.js';
 import type { SessionData, SegmentNode, Segment } from '../src/types.js';
+import type { GitData } from '../src/providers/git.js';
 
 const session: SessionData = { cwd: '/Users/test/project' };
 const providerData = new Map<string, unknown>();
@@ -121,7 +122,7 @@ describe('renderTree', () => {
     const reg = makeRegistry({
       name: 'git.branch',
       provider: 'git',
-      render: (ctx) => (ctx.provider as any)?.branch ?? null,
+      render: (ctx) => (ctx.provider as GitData)?.branch ?? null,
     });
     const tree: SegmentNode[] = [{ type: 'git.branch', provider: 'git' }];
     const result = renderTree(tree, reg, session, providers);
@@ -168,13 +169,13 @@ describe('renderTree', () => {
       {
         name: 'git.branch',
         provider: 'git',
-        render: (ctx) => (ctx.provider as any)?.branch ?? null,
+        render: (ctx) => (ctx.provider as GitData)?.branch ?? null,
       },
       {
         name: 'git.insertions',
         provider: 'git',
         render: (ctx) => {
-          const d = ctx.provider as any;
+          const d = ctx.provider as GitData;
           return d?.insertions ? `${d.insertions}` : null;
         },
       },
@@ -182,7 +183,7 @@ describe('renderTree', () => {
         name: 'git.deletions',
         provider: 'git',
         render: (ctx) => {
-          const d = ctx.provider as any;
+          const d = ctx.provider as GitData;
           return d?.deletions ? `${d.deletions}` : null;
         },
       }
@@ -216,13 +217,13 @@ describe('renderTree', () => {
       {
         name: 'git.branch',
         provider: 'git',
-        render: (ctx) => (ctx.provider as any)?.branch ?? null,
+        render: (ctx) => (ctx.provider as GitData)?.branch ?? null,
       },
       {
         name: 'git.insertions',
         provider: 'git',
         render: (ctx) => {
-          const d = ctx.provider as any;
+          const d = ctx.provider as GitData;
           return d?.insertions ? `${d.insertions}` : null;
         },
       },
@@ -230,7 +231,7 @@ describe('renderTree', () => {
         name: 'git.deletions',
         provider: 'git',
         render: (ctx) => {
-          const d = ctx.provider as any;
+          const d = ctx.provider as GitData;
           return d?.deletions ? `${d.deletions}` : null;
         },
       }
@@ -262,13 +263,13 @@ describe('renderTree', () => {
       {
         name: 'git.branch',
         provider: 'git',
-        render: (ctx) => (ctx.provider as any)?.branch ?? null,
+        render: (ctx) => (ctx.provider as GitData)?.branch ?? null,
       },
       {
         name: 'git.insertions',
         provider: 'git',
         render: (ctx) => {
-          const d = ctx.provider as any;
+          const d = ctx.provider as GitData;
           return d?.insertions ? `${d.insertions}` : null;
         },
       },
@@ -276,7 +277,7 @@ describe('renderTree', () => {
         name: 'git.deletions',
         provider: 'git',
         render: (ctx) => {
-          const d = ctx.provider as any;
+          const d = ctx.provider as GitData;
           return d?.deletions ? `${d.deletions}` : null;
         },
       }

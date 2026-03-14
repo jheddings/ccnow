@@ -1,4 +1,4 @@
-import type { SegmentNode } from './types.js';
+import type { SegmentNode, StyleAttrs } from './types.js';
 
 interface JsonSegment {
   segment: string;
@@ -29,7 +29,7 @@ function mapSegment(json: JsonSegment): SegmentNode {
   const provider = inferProvider(json.segment);
   if (provider) node.provider = provider;
 
-  if (json.style) node.style = json.style as any;
+  if (json.style) node.style = json.style as StyleAttrs;
   if (json.props) node.props = json.props;
   if (json.enabled !== undefined) node.enabled = json.enabled;
   if (json.children) {
