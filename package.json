@@ -13,8 +13,10 @@
     "prepare": "husky"
   },
   "lint-staged": {
-    "*.{ts,json}": [
-      "prettier --check",
+    "*.{ts,json,yaml,yml,md}": [
+      "prettier --check"
+    ],
+    "*.ts": [
       "eslint"
     ]
   },
