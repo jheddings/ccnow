@@ -29,6 +29,5 @@ export const defaultPreset: SegmentNode[] = StatusLine(() => [
     ContextPercent({ color: 'white' }),
     Literal({ text: ')' }),
   ]),
-  { type: 'literal', props: { text: ' · ' } },
-  SessionDuration({ color: 'magenta' }),
+  Group({ prefix: ' ·' })(() => [SessionDuration({ color: 'magenta', prefix: ' ' })]),
 ]);
