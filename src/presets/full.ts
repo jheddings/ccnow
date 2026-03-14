@@ -9,7 +9,7 @@ export const fullPreset: SegmentNode[] = StatusLine(() => [
   { type: 'pwd.name', provider: 'pwd', style: { color: 'cyanBright', bold: true } },
   Git()(() => [
     Sep({ char: '|', color: '240' }),
-    Branch({ color: 'whiteBright', bold: true, icon: '\ue0a0 ' }),
+    Branch({ color: 'whiteBright', bold: true, prefix: '\ue0a0 ' }),
     Group({ prefix: ' [', suffix: ']' })(() => [
       Insertions({ color: 'green', prefix: '+' }),
       Deletions({ color: 'red', prefix: ' -' }),

@@ -148,7 +148,7 @@ describe('renderTree', () => {
     const tree: SegmentNode[] = [{
       type: 'git',
       children: [
-        { type: 'git.branch', provider: 'git', style: { icon: '\ue0a0 ' } },
+        { type: 'git.branch', provider: 'git', style: { prefix: '\ue0a0 ' } },
         {
           type: 'group',
           style: { prefix: ' [', suffix: ']' },

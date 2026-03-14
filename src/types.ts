@@ -15,7 +15,6 @@ export interface StyleAttrs {
   color?: string;
   bold?: boolean;
   italic?: boolean;
-  icon?: string;
   prefix?: string;
   suffix?: string;
 }

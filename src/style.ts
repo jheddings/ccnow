@@ -77,8 +77,5 @@ export function applyStyle(value: string, style: StyleAttrs | undefined): string
     }
   }
 
-  // Prepend icon outside styled region so it renders in default color
-  if (style.icon) result = style.icon + result;
-
   return result;
 }

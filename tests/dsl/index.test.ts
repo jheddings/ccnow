@@ -32,10 +32,10 @@ describe('DSL factory functions', () => {
   });
 
   it('Branch creates a git.branch node', () => {
-    const node = Branch({ color: 'white', icon: '\ue0a0 ' });
+    const node = Branch({ color: 'white', prefix: '\ue0a0 ' });
     expect(node.type).toBe('git.branch');
     expect(node.provider).toBe('git');
-    expect(node.style?.icon).toBe('\ue0a0 ');
+    expect(node.style?.prefix).toBe('\ue0a0 ');
   });
 
   it('Git creates a composite node with trailing closure', () => {

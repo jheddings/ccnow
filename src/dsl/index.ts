@@ -21,7 +21,7 @@ interface CompositeProps extends BaseProps {}
 function extractStyle(props: Partial<StyleAttrs>): StyleAttrs | undefined {
   const style: StyleAttrs = {};
   let hasStyle = false;
-  for (const key of ['color', 'bold', 'italic', 'icon', 'prefix', 'suffix'] as const) {
+  for (const key of ['color', 'bold', 'italic', 'prefix', 'suffix'] as const) {
     if (props[key] !== undefined) {
       (style as any)[key] = props[key];
       hasStyle = true;

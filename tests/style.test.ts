@@ -20,10 +20,9 @@ describe('applyStyle', () => {
     expect(result).toContain('%');
   });
 
-  it('applies icon outside styled region', () => {
-    const result = applyStyle('main', { icon: '\ue0a0 ', color: 'white' });
-    // Icon should come before the ANSI codes
-    expect(result.indexOf('\ue0a0')).toBeLessThan(result.indexOf('\x1b['));
+  it('applies prefix inside styled region', () => {
+    const result = applyStyle('main', { prefix: '> ', color: 'white' });
+    expect(result).toContain('> main');
   });
 
   it('applies named color as ANSI code', () => {

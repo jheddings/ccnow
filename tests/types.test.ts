@@ -39,7 +39,6 @@ describe('type contracts', () => {
       color: 'cyan',
       bold: true,
       italic: true,
-      icon: '\ue0a0',
       prefix: '+',
       suffix: '%',
     };

@@ -8,7 +8,7 @@ export const defaultPreset: SegmentNode[] = StatusLine(() => [
   { type: 'pwd.smart', provider: 'pwd', style: { color: '31' } },
   { type: 'pwd.name', provider: 'pwd', style: { color: '39', bold: true } },
   Git({ prefix: ' | ', color: '240' })(() => [
-    Branch({ color: 'whiteBright', bold: true, icon: '\ue0a0 ' }),
+    Branch({ color: 'whiteBright', bold: true, prefix: '\ue0a0 ' }),
     Group({ prefix: ' [', suffix: ']' })(() => [
       Insertions({ color: 'green', prefix: '+' }),
       Deletions({ color: 'red', prefix: ' -' }),
