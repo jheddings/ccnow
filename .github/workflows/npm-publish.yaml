@@ -1,26 +1,28 @@
-    # Publish to npm when a new release is published
-    ---
+# Publish to npm when a new release is published
+---
+name: Publish package to npm
+
+on:
+  release:
+    types: [released]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  npm-publish:
     name: Publish package to npm
+    runs-on: ubuntu-latest
 
-    on:
-      release:
-        types: [released]
-
-    permissions:
-      contents: read
-      id-token: write
-
-    jobs:
-      npm-publish:
-        name: Publish package to npm
-        runs-on: ubuntu-latest
-
-        steps:
-          - uses: actions/checkout@v6.0.2
-          - uses: actions/setup-node@v6.2.0
-            with:
-              node-version: "lts/*"
-              registry-url: "https://registry.npmjs.org/"
-          - run: npm ci
-          - run: npm run build
-          - run: npm publish --provenance --access public
+    steps:
+      - uses: actions/checkout@v6.0.2
+      - uses: actions/setup-node@v6.2.0
+        with:
+          node-version: 'lts/*'
+          registry-url: 'https://registry.npmjs.org/'
+      - run: npm ci
+      - run: npm run build
+      - run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

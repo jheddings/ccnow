@@ -17,11 +17,11 @@ describe('gitAvailable', () => {
 });
 
 describe('git provider', () => {
-  it('resolves branch name for a git repo', async () => {
+  it('resolves data for a git repo', async () => {
     const session: SessionData = { cwd: process.cwd() };
     const data = (await gitProvider.resolve(session)) as GitData;
-    expect(typeof data.branch).toBe('string');
-    expect(data.branch?.length).toBeGreaterThan(0);
+    // branch may be null in detached HEAD (e.g. CI checkout)
+    expect(data.branch === null || typeof data.branch === 'string').toBe(true);
   });
 
   it('returns null fields for non-git directory', async () => {
