@@ -1,7 +1,7 @@
 import {
   StatusLine, GitGroup, Group, GitBranch, GitInsertions, GitDeletions,
   ContextGroup, ContextTokens, ContextSize, ContextPercent, Literal,
-  ModelName, CostUSD,
+  ModelName, CostUSD, SessionDuration, SessionLinesAdded, SessionLinesRemoved,
 } from '../dsl/index.js';
 import type { SegmentNode } from '../types.js';
 
@@ -27,5 +27,12 @@ export const fullPreset: SegmentNode[] = StatusLine(() => [
     Literal({ text: ')' }),
   ]),
   { type: 'literal', props: { text: ' · ' } },
-  CostUSD({ color: 'yellow' }),
+  CostUSD({ color: 'yellow', bold: true }),
+  { type: 'literal', props: { text: ' · ' } },
+  SessionDuration({ color: 'magenta' }),
+  { type: 'literal', props: { text: ' · ' } },
+  Group()(() => [
+    SessionLinesAdded({ color: 'green', prefix: '+' }),
+    SessionLinesRemoved({ color: 'red', prefix: ' -' }),
+  ]),
 ]);
