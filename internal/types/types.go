@@ -2,16 +2,23 @@ package types
 
 // SessionData represents the JSON session data piped from Claude Code.
 type SessionData struct {
-	CWD           string         `json:"cwd"`
-	Model         *ModelInfo     `json:"model,omitempty"`
-	Cost          *CostInfo      `json:"cost,omitempty"`
-	ContextWindow *ContextWindow `json:"context_window,omitempty"`
+	CWD           string           `json:"cwd"`
+	Model         *ModelInfo       `json:"model,omitempty"`
+	Cost          *CostInfo        `json:"cost,omitempty"`
+	ContextWindow *ContextWindow   `json:"context_window,omitempty"`
+	Version       string           `json:"version,omitempty"`
+	OutputStyle   *OutputStyleInfo `json:"output_style,omitempty"`
 }
 
 // ModelInfo contains model identification from the session.
 type ModelInfo struct {
 	ID          string `json:"id"`
 	DisplayName string `json:"display_name"`
+}
+
+// OutputStyleInfo contains the output style configuration.
+type OutputStyleInfo struct {
+	Name string `json:"name"`
 }
 
 // CostInfo contains session cost and timing data.
@@ -25,11 +32,12 @@ type CostInfo struct {
 
 // ContextWindow contains token usage data.
 type ContextWindow struct {
-	UsedPercentage    int           `json:"used_percentage"`
-	ContextWindowSize int           `json:"context_window_size,omitempty"`
-	TotalInputTokens  *int          `json:"total_input_tokens,omitempty"`
-	TotalOutputTokens *int          `json:"total_output_tokens,omitempty"`
-	CurrentUsage      *CurrentUsage `json:"current_usage,omitempty"`
+	UsedPercentage      int           `json:"used_percentage"`
+	RemainingPercentage int           `json:"remaining_percentage"`
+	ContextWindowSize   int           `json:"context_window_size,omitempty"`
+	TotalInputTokens    *int          `json:"total_input_tokens,omitempty"`
+	TotalOutputTokens   *int          `json:"total_output_tokens,omitempty"`
+	CurrentUsage        *CurrentUsage `json:"current_usage,omitempty"`
 }
 
 // CurrentUsage breaks down token counts by category.
