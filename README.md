@@ -1,5 +1,7 @@
 # ccglow
 
+![ccglow full preset](docs/images/ccglow-full.png)
+
 A composable, [spaceship](https://spaceship-prompt.sh)-inspired statusline for [Claude Code](https://claude.ai/code).
 
 Single binary. Zero runtime dependencies. Raw ANSI. Segment tree architecture.
