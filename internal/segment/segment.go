@@ -17,6 +17,10 @@ func RegisterBuiltin(registry *Registry) {
 	registry.Register(&gitBranchSegment{})
 	registry.Register(&gitInsertionsSegment{})
 	registry.Register(&gitDeletionsSegment{})
+	registry.Register(&gitModifiedSegment{})
+	registry.Register(&gitStagedSegment{})
+	registry.Register(&gitUntrackedSegment{})
+	registry.Register(&gitWorktreeSegment{})
 	registry.Register(&contextTokensSegment{})
 	registry.Register(&contextSizeSegment{})
 	registry.Register(&contextPercentSegment{})
@@ -134,6 +138,49 @@ func (s *gitDeletionsSegment) Render(ctx *types.SegmentContext) *string {
 	if data, ok := ctx.Provider.(*provider.GitData); ok && data != nil && data.Deletions != nil {
 		v := fmt.Sprintf("%d", *data.Deletions)
 		return &v
+	}
+	return nil
+}
+
+type gitModifiedSegment struct{}
+
+func (s *gitModifiedSegment) Name() string { return "git.modified" }
+func (s *gitModifiedSegment) Render(ctx *types.SegmentContext) *string {
+	if data, ok := ctx.Provider.(*provider.GitData); ok && data != nil && data.Modified != nil {
+		v := fmt.Sprintf("%d", *data.Modified)
+		return &v
+	}
+	return nil
+}
+
+type gitStagedSegment struct{}
+
+func (s *gitStagedSegment) Name() string { return "git.staged" }
+func (s *gitStagedSegment) Render(ctx *types.SegmentContext) *string {
+	if data, ok := ctx.Provider.(*provider.GitData); ok && data != nil && data.Staged != nil {
+		v := fmt.Sprintf("%d", *data.Staged)
+		return &v
+	}
+	return nil
+}
+
+type gitUntrackedSegment struct{}
+
+func (s *gitUntrackedSegment) Name() string { return "git.untracked" }
+func (s *gitUntrackedSegment) Render(ctx *types.SegmentContext) *string {
+	if data, ok := ctx.Provider.(*provider.GitData); ok && data != nil && data.Untracked != nil {
+		v := fmt.Sprintf("%d", *data.Untracked)
+		return &v
+	}
+	return nil
+}
+
+type gitWorktreeSegment struct{}
+
+func (s *gitWorktreeSegment) Name() string { return "git.worktree" }
+func (s *gitWorktreeSegment) Render(ctx *types.SegmentContext) *string {
+	if data, ok := ctx.Provider.(*provider.GitData); ok && data != nil {
+		return data.Worktree
 	}
 	return nil
 }
