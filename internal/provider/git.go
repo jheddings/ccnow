@@ -18,6 +18,10 @@ type GitData struct {
 	Branch     *string
 	Insertions *int
 	Deletions  *int
+	Modified   *int
+	Staged     *int
+	Untracked  *int
+	Worktree   *string
 }
 
 type gitProvider struct{}
