@@ -8,10 +8,12 @@ import (
 
 // SpeedData holds resolved token speed information.
 type SpeedData struct {
-	Input  *string
-	Output *string
-	Total  *string
+	Input  *string `segment:"speed.input"`
+	Output *string `segment:"speed.output"`
+	Total  *string `segment:"speed.total"`
 }
+
+func (p *speedProvider) Fields() any { return &SpeedData{} }
 
 type speedProvider struct{}
 

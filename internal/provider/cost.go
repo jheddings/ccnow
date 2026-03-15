@@ -8,8 +8,10 @@ import (
 
 // CostData holds resolved session cost information.
 type CostData struct {
-	USD *string
+	USD *string `segment:"cost.usd"`
 }
+
+func (p *costProvider) Fields() any { return &CostData{} }
 
 type costProvider struct{}
 
