@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -60,6 +61,8 @@ func (p *gitProvider) Resolve(session *types.SessionData) (any, error) {
 		data.Untracked = intPtr(unt)
 	}
 
+	data.Worktree = detectWorktree(cwd)
+
 	return data, nil
 }
 
@@ -95,6 +98,40 @@ func parseGitStatus(cwd string) (modified, staged, untracked int, err error) {
 }
 
 func intPtr(n int) *int { return &n }
+
+// detectWorktree returns the worktree name if cwd is inside a linked
+// worktree, or nil if it is the main working copy.
+func detectWorktree(cwd string) *string {
+	gitDir, err := gitExec(cwd, "rev-parse", "--git-dir")
+	if err != nil {
+		return nil
+	}
+	commonDir, err := gitExec(cwd, "rev-parse", "--git-common-dir")
+	if err != nil {
+		return nil
+	}
+	// Normalize to absolute paths for comparison
+	if !filepath.IsAbs(gitDir) {
+		gitDir = filepath.Join(cwd, gitDir)
+	}
+	if !filepath.IsAbs(commonDir) {
+		commonDir = filepath.Join(cwd, commonDir)
+	}
+	gitDir = filepath.Clean(gitDir)
+	commonDir = filepath.Clean(commonDir)
+
+	if gitDir == commonDir {
+		return nil // main working copy
+	}
+
+	// In a linked worktree — get the worktree root name
+	toplevel, err := gitExec(cwd, "rev-parse", "--show-toplevel")
+	if err != nil {
+		return nil
+	}
+	name := filepath.Base(toplevel)
+	return &name
+}
 
 var (
 	insertionRe = regexp.MustCompile(`(\d+) insertion`)

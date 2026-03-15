@@ -120,3 +120,48 @@ func TestGitStatusClean(t *testing.T) {
 		t.Errorf("expected 0 untracked, got %v", data.Untracked)
 	}
 }
+
+func TestGitWorktreeDetection(t *testing.T) {
+	skipWithoutGit(t)
+	dir := initTempRepo(t)
+
+	// Create a linked worktree
+	wtDir := filepath.Join(t.TempDir(), "my-worktree")
+	cmd := exec.Command("git", "worktree", "add", wtDir, "-b", "test-branch")
+	cmd.Dir = dir
+	if out, err := cmd.CombinedOutput(); err != nil {
+		t.Fatalf("worktree add failed: %s", out)
+	}
+
+	p := &gitProvider{}
+	sess := &types.SessionData{CWD: wtDir}
+	result, err := p.Resolve(sess)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	data := result.(*GitData)
+	if data.Worktree == nil {
+		t.Fatal("expected non-nil Worktree in linked worktree")
+	}
+	if *data.Worktree != "my-worktree" {
+		t.Errorf("expected worktree name 'my-worktree', got %q", *data.Worktree)
+	}
+}
+
+func TestGitWorktreeMainCopy(t *testing.T) {
+	skipWithoutGit(t)
+	dir := initTempRepo(t)
+
+	p := &gitProvider{}
+	sess := &types.SessionData{CWD: dir}
+	result, err := p.Resolve(sess)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	data := result.(*GitData)
+	if data.Worktree != nil {
+		t.Errorf("expected nil Worktree in main copy, got %q", *data.Worktree)
+	}
+}
