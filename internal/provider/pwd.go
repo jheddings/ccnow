@@ -51,23 +51,24 @@ func smartPrefix(cwd string) string {
 		return ""
 	}
 
-	parts := strings.Split(dir, "/")
-	var segments []string
-	for _, p := range parts {
-		if p != "" {
-			segments = append(segments, p)
-		}
-	}
-
+	// Separate the root prefix from the relative path segments
 	root := ""
-	if strings.HasPrefix(dir, "~") {
+	rel := dir
+	if strings.HasPrefix(dir, "~/") {
 		root = "~/"
-		if len(segments) > 0 && segments[0] == "~" {
-			segments = segments[1:]
-		}
+		rel = dir[2:]
+	} else if dir == "~" {
+		return "~/"
 	} else if strings.HasPrefix(dir, "/") {
 		root = "/"
+		rel = dir[1:]
 	}
+
+	if rel == "" {
+		return root
+	}
+
+	segments := strings.Split(rel, "/")
 
 	if len(segments) <= 2 {
 		return root + strings.Join(segments, "/") + "/"
