@@ -23,7 +23,15 @@
     },
     {
       "segment": "git.deletions",
-      "style": { "color": "#FF6B6B", "bgcolor": "#3A3A3A", "prefix": " -", "suffix": " " }
+      "style": { "color": "#FF6B6B", "bgcolor": "#3A3A3A", "prefix": " -" }
+    },
+    {
+      "segment": "git.modified",
+      "style": { "color": "#FFD700", "bgcolor": "#3A3A3A", "prefix": " ~" }
+    },
+    {
+      "segment": "git.untracked",
+      "style": { "color": "#8BE9FD", "bgcolor": "#3A3A3A", "prefix": " ?", "suffix": " " }
     },
     {
       "segment": "literal",
