@@ -21,10 +21,12 @@ test:
 # auto-format
 tidy: setup
 	gofmt -w .
+	npx --yes prettier --write .
 
 # run format and vet checks
 check:
 	gofmt -l . | grep . && exit 1 || true
+	npx --yes prettier --check .
 	go vet ./...
 
 # full preflight: build + check + test

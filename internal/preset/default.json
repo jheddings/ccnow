@@ -1,0 +1,78 @@
+{
+  "segments": [
+    {
+      "segment": "pwd.smart",
+      "style": {
+        "color": "31"
+      }
+    },
+    {
+      "segment": "pwd.name",
+      "style": {
+        "color": "39",
+        "bold": true
+      }
+    },
+    {
+      "segment": "group",
+      "style": {
+        "prefix": " | ",
+        "color": "240"
+      },
+      "children": [
+        {
+          "segment": "git.branch",
+          "style": {
+            "color": "whiteBright",
+            "bold": true,
+            "prefix": " "
+          }
+        },
+        {
+          "segment": "git.insertions",
+          "style": {
+            "color": "green",
+            "prefix": " · +"
+          }
+        },
+        {
+          "segment": "git.deletions",
+          "style": {
+            "color": "red",
+            "prefix": " -"
+          }
+        }
+      ]
+    },
+    {
+      "segment": "group",
+      "style": {
+        "prefix": " | "
+      },
+      "children": [
+        {
+          "segment": "context.tokens",
+          "style": {
+            "color": "white",
+            "bold": true
+          }
+        },
+        {
+          "segment": "context.percent",
+          "style": {
+            "color": "white",
+            "prefix": " (",
+            "suffix": ")"
+          }
+        }
+      ]
+    },
+    {
+      "segment": "session.duration",
+      "style": {
+        "color": "magenta",
+        "prefix": " · "
+      }
+    }
+  ]
+}
