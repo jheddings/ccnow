@@ -39,11 +39,12 @@ type CurrentUsage struct {
 
 // StyleAttrs controls ANSI styling for a segment.
 type StyleAttrs struct {
-	Color  string `json:"color,omitempty"`
-	Bold   bool   `json:"bold,omitempty"`
-	Italic bool   `json:"italic,omitempty"`
-	Prefix string `json:"prefix,omitempty"`
-	Suffix string `json:"suffix,omitempty"`
+	Color      string `json:"color,omitempty"`
+	Background string `json:"bgcolor,omitempty"`
+	Bold       bool   `json:"bold,omitempty"`
+	Italic     bool   `json:"italic,omitempty"`
+	Prefix     string `json:"prefix,omitempty"`
+	Suffix     string `json:"suffix,omitempty"`
 }
 
 // SegmentNode is a node in the render tree. Composite nodes have Children;

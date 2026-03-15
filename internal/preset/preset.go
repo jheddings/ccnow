@@ -11,6 +11,8 @@ func Get(name string) []types.SegmentNode {
 		return minimalPreset()
 	case "full":
 		return fullPreset()
+	case "f1":
+		return f1Preset()
 	default:
 		return nil
 	}
@@ -18,5 +20,5 @@ func Get(name string) []types.SegmentNode {
 
 // List returns all available preset names.
 func List() []string {
-	return []string{"default", "minimal", "full"}
+	return []string{"default", "minimal", "full", "f1"}
 }

@@ -68,6 +68,51 @@ func TestApply_PlainMode(t *testing.T) {
 	}
 }
 
+func TestApply_NamedBackground(t *testing.T) {
+	SetColorLevel(1)
+	result := Apply("text", &types.StyleAttrs{Background: "red"})
+	expected := "\x1b[0m\x1b[41mtext\x1b[0m"
+	if result != expected {
+		t.Errorf("expected %q, got %q", expected, result)
+	}
+}
+
+func TestApply_256Background(t *testing.T) {
+	SetColorLevel(1)
+	result := Apply("text", &types.StyleAttrs{Background: "240"})
+	expected := "\x1b[0m\x1b[48;5;240mtext\x1b[0m"
+	if result != expected {
+		t.Errorf("expected %q, got %q", expected, result)
+	}
+}
+
+func TestApply_HexBackground(t *testing.T) {
+	SetColorLevel(1)
+	result := Apply("text", &types.StyleAttrs{Background: "#00ff00"})
+	expected := "\x1b[0m\x1b[48;2;0;255;0mtext\x1b[0m"
+	if result != expected {
+		t.Errorf("expected %q, got %q", expected, result)
+	}
+}
+
+func TestApply_ColorAndBackground(t *testing.T) {
+	SetColorLevel(1)
+	result := Apply("text", &types.StyleAttrs{Color: "white", Background: "blue"})
+	expected := "\x1b[0m\x1b[37m\x1b[44mtext\x1b[0m"
+	if result != expected {
+		t.Errorf("expected %q, got %q", expected, result)
+	}
+}
+
+func TestApply_BrightBackground(t *testing.T) {
+	SetColorLevel(1)
+	result := Apply("text", &types.StyleAttrs{Background: "redBright"})
+	expected := "\x1b[0m\x1b[101mtext\x1b[0m"
+	if result != expected {
+		t.Errorf("expected %q, got %q", expected, result)
+	}
+}
+
 func TestApply_PrefixInsideColor(t *testing.T) {
 	SetColorLevel(1)
 	result := Apply("val", &types.StyleAttrs{Color: "red", Prefix: ">> "})
