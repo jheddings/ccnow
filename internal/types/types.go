@@ -27,12 +27,15 @@ type CostInfo struct {
 type ContextWindow struct {
 	UsedPercentage    int           `json:"used_percentage"`
 	ContextWindowSize int           `json:"context_window_size,omitempty"`
+	TotalInputTokens  *int          `json:"total_input_tokens,omitempty"`
+	TotalOutputTokens *int          `json:"total_output_tokens,omitempty"`
 	CurrentUsage      *CurrentUsage `json:"current_usage,omitempty"`
 }
 
 // CurrentUsage breaks down token counts by category.
 type CurrentUsage struct {
 	InputTokens              int `json:"input_tokens"`
+	OutputTokens             int `json:"output_tokens"`
 	CacheCreationInputTokens int `json:"cache_creation_input_tokens"`
 	CacheReadInputTokens     int `json:"cache_read_input_tokens"`
 }
