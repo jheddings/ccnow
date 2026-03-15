@@ -2,14 +2,21 @@
 
 A composable, [spaceship](https://spaceship-prompt.sh)-inspired statusline for [Claude Code](https://claude.ai/code).
 
-Zero dependencies. Raw ANSI. Segment tree architecture.
+Single binary. Zero runtime dependencies. Raw ANSI. Segment tree architecture.
 
 ## Quick Start
 
-Install globally:
+Install with `go install`:
 
 ```sh
-npm install -g ccnow
+# use '@latest' or pick a tagged version
+go install github.com/jheddings/ccnow@latest
+```
+
+Or run directly without installing:
+
+```sh
+go run github.com/jheddings/ccnow@latest
 ```
 
 Then ask Claude Code:
@@ -27,11 +34,6 @@ Or add to your `~/.claude/settings.json` manually:
   }
 }
 ```
-
-> **Note:** `npx -y ccnow` also works, but has a
-> [known issue](https://github.com/npm/cli/issues/3781) where `npx` can
-> consume stdin when installing the package for the first time, resulting in
-> an empty statusline. Installing globally avoids this.
 
 ## Presets
 
@@ -56,8 +58,8 @@ ccnow | main | 360K/1M
 Select a preset:
 
 ```sh
-npx -y ccnow --preset=minimal
-npx -y ccnow --preset=full
+ccnow --preset=minimal
+ccnow --preset=full
 ```
 
 ## JSON Config
@@ -65,7 +67,7 @@ npx -y ccnow --preset=full
 Use `--config` for full customization:
 
 ```sh
-npx -y ccnow --config ~/.claude/ccnow.json
+ccnow --config ~/.claude/ccnow.json
 ```
 
 ```json
@@ -142,15 +144,21 @@ Colors support three formats:
 ## CLI Options
 
 ```
-Usage: ccnow [options]
+Usage: ccnow [flags]
 
-Options:
+Flags:
   --preset <name>     Use a named preset (default, minimal, full)
   --config <path>     Load JSON config file
   --format <type>     Output format: ansi (default), plain
   --tee <path>        Write raw stdin JSON to file before processing
   --help              Show help
   --version           Show version
+```
+
+## Building from Source
+
+```sh
+go build -o ccnow .
 ```
 
 ## License
