@@ -2,7 +2,7 @@
   "segments": [
     {
       "segment": "pwd.smart",
-      "style": { "color": "white", "bgcolor": "#DC0000", "prefix": " " }
+      "style": { "color": "white", "bgcolor": "#DC0000", "prefix": " \uf07b " }
     },
     {
       "segment": "pwd.name",
@@ -44,7 +44,7 @@
     },
     {
       "segment": "context.tokens",
-      "style": { "color": "white", "bgcolor": "#2D2D2D", "bold": true, "prefix": " " }
+      "style": { "color": "white", "bgcolor": "#2D2D2D", "bold": true, "prefix": " \uf0e4 " }
     },
     {
       "segment": "context.size",
@@ -70,7 +70,7 @@
     },
     {
       "segment": "session.duration",
-      "style": { "color": "black", "bgcolor": "#FF8000", "bold": true, "prefix": " ", "suffix": " " }
+      "style": { "color": "black", "bgcolor": "#FF8000", "bold": true, "prefix": " \uf017 ", "suffix": " " }
     },
     {
       "segment": "literal",

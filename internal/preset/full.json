@@ -3,7 +3,8 @@
     {
       "segment": "pwd.smart",
       "style": {
-        "color": "31"
+        "color": "31",
+        "prefix": "\uf07b "
       }
     },
     {
@@ -60,7 +61,8 @@
           "segment": "context.tokens",
           "style": {
             "color": "white",
-            "bold": true
+            "bold": true,
+            "prefix": "\uf0e4 "
           }
         },
         {
@@ -92,7 +94,7 @@
       "segment": "session.duration",
       "style": {
         "color": "magenta",
-        "prefix": " · "
+        "prefix": " · \uf017 "
       }
     },
     {
