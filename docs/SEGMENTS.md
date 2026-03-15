@@ -76,11 +76,13 @@ scales the same way as tokens: raw below 1K, `n.nK t/s` above.
 
 ## Session — `session`
 
-| Segment                | Description                          | Example Output |
-| ---------------------- | ------------------------------------ | -------------- |
-| `session.duration`     | Wall-clock session time              | `2h 15m`, `45m`|
-| `session.lines-added`  | Total lines added this session       | `1380`         |
-| `session.lines-removed`| Total lines removed this session     | `21`           |
+| Segment                      | Description                          | Example Output |
+| ---------------------------- | ------------------------------------ | -------------- |
+| `session.duration.total`     | Wall-clock session time              | `2h 15m`, `45m`|
+| `session.duration.api`       | Time spent on API calls              | `8m`, `1h 2m`  |
+| `session.id`                 | Session identifier                   | `abc-123`      |
+| `session.lines-added`        | Total lines added this session       | `1380`         |
+| `session.lines-removed`      | Total lines removed this session     | `21`           |
 
 ## Utility Segments
 

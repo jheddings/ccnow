@@ -154,10 +154,18 @@
       },
       "children": [
         {
-          "segment": "session.duration",
+          "segment": "session.duration.total",
           "style": {
             "color": "magenta",
             "prefix": "\uf017 "
+          }
+        },
+        {
+          "segment": "session.duration.api",
+          "style": {
+            "color": "240",
+            "prefix": " (",
+            "suffix": ")"
           }
         }
       ]
@@ -180,6 +188,20 @@
           "style": {
             "color": "red",
             "prefix": " -"
+          }
+        }
+      ]
+    },
+    {
+      "segment": "group",
+      "style": {
+        "prefix": " · "
+      },
+      "children": [
+        {
+          "segment": "session.id",
+          "style": {
+            "color": "240"
           }
         }
       ]
