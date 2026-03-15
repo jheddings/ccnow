@@ -26,8 +26,13 @@ func RegisterBuiltin(registry *Registry) {
 	registry.Register(&contextTokensSegment{})
 	registry.Register(&contextSizeSegment{})
 	registry.Register(&contextPercentSegment{})
+	registry.Register(&contextInputSegment{})
+	registry.Register(&contextOutputSegment{})
 	registry.Register(&modelNameSegment{})
 	registry.Register(&costUSDSegment{})
+	registry.Register(&speedInputSegment{})
+	registry.Register(&speedOutputSegment{})
+	registry.Register(&speedTotalSegment{})
 	registry.Register(&sessionDurationSegment{})
 	registry.Register(&sessionLinesAddedSegment{})
 	registry.Register(&sessionLinesRemovedSegment{})
@@ -240,6 +245,26 @@ func (s *contextPercentSegment) Render(ctx *types.SegmentContext) *string {
 	return nil
 }
 
+type contextInputSegment struct{}
+
+func (s *contextInputSegment) Name() string { return "context.input" }
+func (s *contextInputSegment) Render(ctx *types.SegmentContext) *string {
+	if data, ok := ctx.Provider.(*provider.ContextData); ok && data != nil && data.Input != "" {
+		return &data.Input
+	}
+	return nil
+}
+
+type contextOutputSegment struct{}
+
+func (s *contextOutputSegment) Name() string { return "context.output" }
+func (s *contextOutputSegment) Render(ctx *types.SegmentContext) *string {
+	if data, ok := ctx.Provider.(*provider.ContextData); ok && data != nil && data.Output != "" {
+		return &data.Output
+	}
+	return nil
+}
+
 // --- Model ---
 
 type modelNameSegment struct{}
@@ -260,6 +285,38 @@ func (s *costUSDSegment) Name() string { return "cost.usd" }
 func (s *costUSDSegment) Render(ctx *types.SegmentContext) *string {
 	if data, ok := ctx.Provider.(*provider.CostData); ok && data != nil {
 		return data.USD
+	}
+	return nil
+}
+
+// --- Speed ---
+
+type speedInputSegment struct{}
+
+func (s *speedInputSegment) Name() string { return "speed.input" }
+func (s *speedInputSegment) Render(ctx *types.SegmentContext) *string {
+	if data, ok := ctx.Provider.(*provider.SpeedData); ok && data != nil {
+		return data.Input
+	}
+	return nil
+}
+
+type speedOutputSegment struct{}
+
+func (s *speedOutputSegment) Name() string { return "speed.output" }
+func (s *speedOutputSegment) Render(ctx *types.SegmentContext) *string {
+	if data, ok := ctx.Provider.(*provider.SpeedData); ok && data != nil {
+		return data.Output
+	}
+	return nil
+}
+
+type speedTotalSegment struct{}
+
+func (s *speedTotalSegment) Name() string { return "speed.total" }
+func (s *speedTotalSegment) Render(ctx *types.SegmentContext) *string {
+	if data, ok := ctx.Provider.(*provider.SpeedData); ok && data != nil {
+		return data.Total
 	}
 	return nil
 }

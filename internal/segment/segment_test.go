@@ -143,3 +143,101 @@ func TestGitWorktreeSegment(t *testing.T) {
 		t.Errorf("expected nil, got %v", *result)
 	}
 }
+
+func TestContextInputSegment(t *testing.T) {
+	seg := &contextInputSegment{}
+	if seg.Name() != "context.input" {
+		t.Errorf("expected name context.input, got %s", seg.Name())
+	}
+
+	ctx := &types.SegmentContext{Provider: &provider.ContextData{Input: "50K"}}
+	result := seg.Render(ctx)
+	if result == nil || *result != "50K" {
+		t.Errorf("expected '50K', got %v", result)
+	}
+
+	ctx = &types.SegmentContext{Provider: &provider.ContextData{}}
+	result = seg.Render(ctx)
+	if result != nil {
+		t.Errorf("expected nil for empty Input, got %v", result)
+	}
+}
+
+func TestContextOutputSegment(t *testing.T) {
+	seg := &contextOutputSegment{}
+	if seg.Name() != "context.output" {
+		t.Errorf("expected name context.output, got %s", seg.Name())
+	}
+
+	ctx := &types.SegmentContext{Provider: &provider.ContextData{Output: "8K"}}
+	result := seg.Render(ctx)
+	if result == nil || *result != "8K" {
+		t.Errorf("expected '8K', got %v", result)
+	}
+
+	ctx = &types.SegmentContext{Provider: &provider.ContextData{}}
+	result = seg.Render(ctx)
+	if result != nil {
+		t.Errorf("expected nil for empty Output, got %v", result)
+	}
+}
+
+func TestSpeedInputSegment(t *testing.T) {
+	seg := &speedInputSegment{}
+	if seg.Name() != "speed.input" {
+		t.Errorf("expected name speed.input, got %s", seg.Name())
+	}
+
+	v := "2K t/s"
+	ctx := &types.SegmentContext{Provider: &provider.SpeedData{Input: &v}}
+	result := seg.Render(ctx)
+	if result == nil || *result != "2K t/s" {
+		t.Errorf("expected '2K t/s', got %v", result)
+	}
+
+	ctx = &types.SegmentContext{Provider: &provider.SpeedData{}}
+	result = seg.Render(ctx)
+	if result != nil {
+		t.Errorf("expected nil, got %v", result)
+	}
+}
+
+func TestSpeedOutputSegment(t *testing.T) {
+	seg := &speedOutputSegment{}
+	if seg.Name() != "speed.output" {
+		t.Errorf("expected name speed.output, got %s", seg.Name())
+	}
+
+	v := "1K t/s"
+	ctx := &types.SegmentContext{Provider: &provider.SpeedData{Output: &v}}
+	result := seg.Render(ctx)
+	if result == nil || *result != "1K t/s" {
+		t.Errorf("expected '1K t/s', got %v", result)
+	}
+
+	ctx = &types.SegmentContext{Provider: &provider.SpeedData{}}
+	result = seg.Render(ctx)
+	if result != nil {
+		t.Errorf("expected nil, got %v", result)
+	}
+}
+
+func TestSpeedTotalSegment(t *testing.T) {
+	seg := &speedTotalSegment{}
+	if seg.Name() != "speed.total" {
+		t.Errorf("expected name speed.total, got %s", seg.Name())
+	}
+
+	v := "3K t/s"
+	ctx := &types.SegmentContext{Provider: &provider.SpeedData{Total: &v}}
+	result := seg.Render(ctx)
+	if result == nil || *result != "3K t/s" {
+		t.Errorf("expected '3K t/s', got %v", result)
+	}
+
+	ctx = &types.SegmentContext{Provider: &provider.SpeedData{}}
+	result = seg.Render(ctx)
+	if result != nil {
+		t.Errorf("expected nil, got %v", result)
+	}
+}
