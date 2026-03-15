@@ -35,7 +35,9 @@ func RegisterBuiltin(registry *Registry) {
 	registry.Register(&speedInputSegment{})
 	registry.Register(&speedOutputSegment{})
 	registry.Register(&speedTotalSegment{})
-	registry.Register(&sessionDurationSegment{})
+	registry.Register(&sessionDurationTotalSegment{})
+	registry.Register(&sessionDurationAPISegment{})
+	registry.Register(&sessionIDSegment{})
 	registry.Register(&sessionLinesAddedSegment{})
 	registry.Register(&sessionLinesRemovedSegment{})
 	registry.Register(&claudeVersionSegment{})
@@ -348,12 +350,32 @@ func (s *speedTotalSegment) Render(ctx *types.SegmentContext) *string {
 
 // --- Session ---
 
-type sessionDurationSegment struct{}
+type sessionDurationTotalSegment struct{}
 
-func (s *sessionDurationSegment) Name() string { return "session.duration" }
-func (s *sessionDurationSegment) Render(ctx *types.SegmentContext) *string {
+func (s *sessionDurationTotalSegment) Name() string { return "session.duration.total" }
+func (s *sessionDurationTotalSegment) Render(ctx *types.SegmentContext) *string {
 	if data, ok := ctx.Provider.(*provider.SessionData); ok && data != nil {
 		return data.Duration
+	}
+	return nil
+}
+
+type sessionDurationAPISegment struct{}
+
+func (s *sessionDurationAPISegment) Name() string { return "session.duration.api" }
+func (s *sessionDurationAPISegment) Render(ctx *types.SegmentContext) *string {
+	if data, ok := ctx.Provider.(*provider.SessionData); ok && data != nil {
+		return data.APIDuration
+	}
+	return nil
+}
+
+type sessionIDSegment struct{}
+
+func (s *sessionIDSegment) Name() string { return "session.id" }
+func (s *sessionIDSegment) Render(ctx *types.SegmentContext) *string {
+	if data, ok := ctx.Provider.(*provider.SessionData); ok && data != nil {
+		return data.ID
 	}
 	return nil
 }
