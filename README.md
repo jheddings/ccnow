@@ -6,9 +6,15 @@ Zero dependencies. Raw ANSI. Segment tree architecture.
 
 ## Quick Start
 
-Ask Claude Code:
+Install globally:
 
-> Set my statusline to use the default preset from https://github.com/jheddings/ccnow
+```sh
+npm install -g ccnow
+```
+
+Then ask Claude Code:
+
+> Set my statusline to use ccnow from https://github.com/jheddings/ccnow
 
 Or add to your `~/.claude/settings.json` manually:
 
@@ -16,11 +22,16 @@ Or add to your `~/.claude/settings.json` manually:
 {
   "statusLine": {
     "type": "command",
-    "command": "npx -y ccnow",
+    "command": "ccnow",
     "padding": 0
   }
 }
 ```
+
+> **Note:** `npx -y ccnow` also works, but has a
+> [known issue](https://github.com/npm/cli/issues/3781) where `npx` can
+> consume stdin when installing the package for the first time, resulting in
+> an empty statusline. Installing globally avoids this.
 
 ## Presets
 
