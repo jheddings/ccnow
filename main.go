@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"runtime/debug"
 
 	"github.com/jheddings/ccglow/internal/config"
 	"github.com/jheddings/ccglow/internal/preset"
@@ -16,7 +17,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var version = "dev"
+var version = func() string {
+	if info, ok := debug.ReadBuildInfo(); ok && info.Main.Version != "" && info.Main.Version != "(devel)" {
+		return info.Main.Version
+	}
+	return "dev"
+}()
 
 func main() {
 	var presetName, configPath, format, tee string
