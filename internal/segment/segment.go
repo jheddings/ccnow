@@ -28,7 +28,9 @@ func RegisterBuiltin(registry *Registry) {
 	registry.Register(&contextPercentSegment{})
 	registry.Register(&contextInputSegment{})
 	registry.Register(&contextOutputSegment{})
+	registry.Register(&contextRemainingSegment{})
 	registry.Register(&modelNameSegment{})
+	registry.Register(&modelIDSegment{})
 	registry.Register(&costUSDSegment{})
 	registry.Register(&speedInputSegment{})
 	registry.Register(&speedOutputSegment{})
@@ -36,6 +38,8 @@ func RegisterBuiltin(registry *Registry) {
 	registry.Register(&sessionDurationSegment{})
 	registry.Register(&sessionLinesAddedSegment{})
 	registry.Register(&sessionLinesRemovedSegment{})
+	registry.Register(&claudeVersionSegment{})
+	registry.Register(&claudeStyleSegment{})
 }
 
 // Registry maps segment type names to their implementations.
@@ -265,6 +269,17 @@ func (s *contextOutputSegment) Render(ctx *types.SegmentContext) *string {
 	return nil
 }
 
+type contextRemainingSegment struct{}
+
+func (s *contextRemainingSegment) Name() string { return "context.remaining" }
+func (s *contextRemainingSegment) Render(ctx *types.SegmentContext) *string {
+	if data, ok := ctx.Provider.(*provider.ContextData); ok && data != nil && data.Remaining != nil {
+		v := fmt.Sprintf("%d%%", *data.Remaining)
+		return &v
+	}
+	return nil
+}
+
 // --- Model ---
 
 type modelNameSegment struct{}
@@ -273,6 +288,16 @@ func (s *modelNameSegment) Name() string { return "model.name" }
 func (s *modelNameSegment) Render(ctx *types.SegmentContext) *string {
 	if data, ok := ctx.Provider.(*provider.ModelData); ok && data != nil {
 		return data.Name
+	}
+	return nil
+}
+
+type modelIDSegment struct{}
+
+func (s *modelIDSegment) Name() string { return "model.id" }
+func (s *modelIDSegment) Render(ctx *types.SegmentContext) *string {
+	if data, ok := ctx.Provider.(*provider.ModelData); ok && data != nil {
+		return data.ID
 	}
 	return nil
 }
@@ -351,6 +376,28 @@ func (s *sessionLinesRemovedSegment) Render(ctx *types.SegmentContext) *string {
 	if data, ok := ctx.Provider.(*provider.SessionData); ok && data != nil && data.LinesRemoved != nil {
 		v := fmt.Sprintf("%d", *data.LinesRemoved)
 		return &v
+	}
+	return nil
+}
+
+// --- Claude ---
+
+type claudeVersionSegment struct{}
+
+func (s *claudeVersionSegment) Name() string { return "claude.version" }
+func (s *claudeVersionSegment) Render(ctx *types.SegmentContext) *string {
+	if data, ok := ctx.Provider.(*provider.ClaudeData); ok && data != nil {
+		return data.Version
+	}
+	return nil
+}
+
+type claudeStyleSegment struct{}
+
+func (s *claudeStyleSegment) Name() string { return "claude.style" }
+func (s *claudeStyleSegment) Render(ctx *types.SegmentContext) *string {
+	if data, ok := ctx.Provider.(*provider.ClaudeData); ok && data != nil {
+		return data.Style
 	}
 	return nil
 }

@@ -8,11 +8,12 @@ import (
 
 // ContextData holds resolved context window information.
 type ContextData struct {
-	Tokens  string
-	Size    string
-	Percent *int
-	Input   string
-	Output  string
+	Tokens    string
+	Size      string
+	Percent   *int
+	Remaining *int
+	Input     string
+	Output    string
 }
 
 type contextProvider struct{}
@@ -43,6 +44,11 @@ func (p *contextProvider) Resolve(session *types.SessionData) (any, error) {
 	if cw.UsedPercentage > 0 || cw.CurrentUsage != nil {
 		pct := cw.UsedPercentage
 		data.Percent = &pct
+	}
+
+	if cw.RemainingPercentage > 0 || cw.CurrentUsage != nil {
+		rem := cw.RemainingPercentage
+		data.Remaining = &rem
 	}
 
 	if cw.TotalInputTokens != nil {

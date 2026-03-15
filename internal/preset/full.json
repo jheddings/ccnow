@@ -61,6 +61,13 @@
       "children": [
         {
           "segment": "model.name"
+        },
+        {
+          "segment": "model.id",
+          "style": {
+            "color": "240",
+            "prefix": " "
+          }
         }
       ]
     },
@@ -92,6 +99,14 @@
             "prefix": " (",
             "suffix": ")"
           }
+        },
+        {
+          "segment": "context.remaining",
+          "style": {
+            "color": "white",
+            "prefix": " [",
+            "suffix": " free]"
+          }
         }
       ]
     },
@@ -106,6 +121,28 @@
           "style": {
             "color": "yellow",
             "bold": true
+          }
+        }
+      ]
+    },
+    {
+      "segment": "group",
+      "style": {
+        "prefix": " · "
+      },
+      "children": [
+        {
+          "segment": "claude.version",
+          "style": {
+            "color": "240",
+            "prefix": "v"
+          }
+        },
+        {
+          "segment": "claude.style",
+          "style": {
+            "color": "cyan",
+            "prefix": " · "
           }
         }
       ]

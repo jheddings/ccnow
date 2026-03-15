@@ -8,6 +8,7 @@ import (
 )
 
 func intPtr(n int) *int { return &n }
+func strPtr(s string) *string { return &s }
 
 func TestNewlineSegment(t *testing.T) {
 	seg := &newlineSegment{}
@@ -239,5 +240,81 @@ func TestSpeedTotalSegment(t *testing.T) {
 	result = seg.Render(ctx)
 	if result != nil {
 		t.Errorf("expected nil, got %v", result)
+	}
+}
+
+func TestClaudeVersionSegment(t *testing.T) {
+	seg := &claudeVersionSegment{}
+	if seg.Name() != "claude.version" {
+		t.Errorf("expected name claude.version, got %s", seg.Name())
+	}
+
+	ctx := &types.SegmentContext{Provider: &provider.ClaudeData{Version: strPtr("2.1.75")}}
+	result := seg.Render(ctx)
+	if result == nil || *result != "2.1.75" {
+		t.Errorf("expected '2.1.75', got %v", result)
+	}
+
+	ctx = &types.SegmentContext{Provider: &provider.ClaudeData{}}
+	result = seg.Render(ctx)
+	if result != nil {
+		t.Errorf("expected nil, got %v", *result)
+	}
+}
+
+func TestClaudeStyleSegment(t *testing.T) {
+	seg := &claudeStyleSegment{}
+	if seg.Name() != "claude.style" {
+		t.Errorf("expected name claude.style, got %s", seg.Name())
+	}
+
+	ctx := &types.SegmentContext{Provider: &provider.ClaudeData{Style: strPtr("concise")}}
+	result := seg.Render(ctx)
+	if result == nil || *result != "concise" {
+		t.Errorf("expected 'concise', got %v", result)
+	}
+
+	ctx = &types.SegmentContext{Provider: &provider.ClaudeData{}}
+	result = seg.Render(ctx)
+	if result != nil {
+		t.Errorf("expected nil, got %v", *result)
+	}
+}
+
+func TestModelIDSegment(t *testing.T) {
+	seg := &modelIDSegment{}
+	if seg.Name() != "model.id" {
+		t.Errorf("expected name model.id, got %s", seg.Name())
+	}
+
+	ctx := &types.SegmentContext{Provider: &provider.ModelData{ID: strPtr("claude-opus-4-6[1m]")}}
+	result := seg.Render(ctx)
+	if result == nil || *result != "claude-opus-4-6[1m]" {
+		t.Errorf("expected 'claude-opus-4-6[1m]', got %v", result)
+	}
+
+	ctx = &types.SegmentContext{Provider: &provider.ModelData{}}
+	result = seg.Render(ctx)
+	if result != nil {
+		t.Errorf("expected nil, got %v", *result)
+	}
+}
+
+func TestContextRemainingSegment(t *testing.T) {
+	seg := &contextRemainingSegment{}
+	if seg.Name() != "context.remaining" {
+		t.Errorf("expected name context.remaining, got %s", seg.Name())
+	}
+
+	ctx := &types.SegmentContext{Provider: &provider.ContextData{Remaining: intPtr(96)}}
+	result := seg.Render(ctx)
+	if result == nil || *result != "96%" {
+		t.Errorf("expected '96%%', got %v", result)
+	}
+
+	ctx = &types.SegmentContext{Provider: &provider.ContextData{}}
+	result = seg.Render(ctx)
+	if result != nil {
+		t.Errorf("expected nil, got %v", *result)
 	}
 }
