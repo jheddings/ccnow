@@ -10,6 +10,7 @@ import (
 // RegisterBuiltin adds all built-in segment implementations to the registry.
 func RegisterBuiltin(registry *Registry) {
 	registry.Register(&literalSegment{})
+	registry.Register(&newlineSegment{})
 	registry.Register(&pwdNameSegment{})
 	registry.Register(&pwdPathSegment{})
 	registry.Register(&pwdSmartSegment{})
@@ -59,6 +60,16 @@ func (s *literalSegment) Render(ctx *types.SegmentContext) *string {
 		return &text
 	}
 	return nil
+}
+
+// --- Newline ---
+
+type newlineSegment struct{}
+
+func (s *newlineSegment) Name() string { return "newline" }
+func (s *newlineSegment) Render(ctx *types.SegmentContext) *string {
+	v := "\n"
+	return &v
 }
 
 // --- PWD ---

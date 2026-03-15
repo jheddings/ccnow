@@ -9,7 +9,7 @@ import (
 
 var noProviderSegments = map[string]bool{
 	"literal": true,
-	"sep":     true,
+	"newline": true,
 	"group":   true,
 }
 
