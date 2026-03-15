@@ -37,7 +37,7 @@
   },
   "homepage": "https://github.com/jheddings/ccnow",
   "engines": {
-    "node": ">=18"
+    "node": ">=18.20.8"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
