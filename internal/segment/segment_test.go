@@ -300,6 +300,66 @@ func TestModelIDSegment(t *testing.T) {
 	}
 }
 
+func TestSessionDurationTotalSegment(t *testing.T) {
+	seg := &sessionDurationTotalSegment{}
+	if seg.Name() != "session.duration.total" {
+		t.Errorf("expected name session.duration.total, got %s", seg.Name())
+	}
+
+	dur := "1h 30m"
+	ctx := &types.SegmentContext{Provider: &provider.SessionData{Duration: &dur}}
+	result := seg.Render(ctx)
+	if result == nil || *result != "1h 30m" {
+		t.Errorf("expected '1h 30m', got %v", result)
+	}
+
+	ctx = &types.SegmentContext{Provider: &provider.SessionData{}}
+	result = seg.Render(ctx)
+	if result != nil {
+		t.Errorf("expected nil, got %v", *result)
+	}
+}
+
+func TestSessionDurationAPISegment(t *testing.T) {
+	seg := &sessionDurationAPISegment{}
+	if seg.Name() != "session.duration.api" {
+		t.Errorf("expected name session.duration.api, got %s", seg.Name())
+	}
+
+	dur := "8m"
+	ctx := &types.SegmentContext{Provider: &provider.SessionData{APIDuration: &dur}}
+	result := seg.Render(ctx)
+	if result == nil || *result != "8m" {
+		t.Errorf("expected '8m', got %v", result)
+	}
+
+	ctx = &types.SegmentContext{Provider: &provider.SessionData{}}
+	result = seg.Render(ctx)
+	if result != nil {
+		t.Errorf("expected nil, got %v", *result)
+	}
+}
+
+func TestSessionIDSegment(t *testing.T) {
+	seg := &sessionIDSegment{}
+	if seg.Name() != "session.id" {
+		t.Errorf("expected name session.id, got %s", seg.Name())
+	}
+
+	id := "abc-123"
+	ctx := &types.SegmentContext{Provider: &provider.SessionData{ID: &id}}
+	result := seg.Render(ctx)
+	if result == nil || *result != "abc-123" {
+		t.Errorf("expected 'abc-123', got %v", result)
+	}
+
+	ctx = &types.SegmentContext{Provider: &provider.SessionData{}}
+	result = seg.Render(ctx)
+	if result != nil {
+		t.Errorf("expected nil, got %v", *result)
+	}
+}
+
 func TestContextRemainingSegment(t *testing.T) {
 	seg := &contextRemainingSegment{}
 	if seg.Name() != "context.remaining" {

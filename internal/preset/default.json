@@ -68,7 +68,7 @@
       ]
     },
     {
-      "segment": "session.duration",
+      "segment": "session.duration.total",
       "style": {
         "color": "magenta",
         "prefix": " · "

@@ -52,7 +52,7 @@
       "style": { "color": "#6BBF6B", "bgcolor": "#142814", "bold": true, "prefix": " " }
     },
     {
-      "segment": "session.duration",
+      "segment": "session.duration.total",
       "style": { "color": "#6BBF6B", "bgcolor": "#142814", "prefix": " \uf017 ", "suffix": " " }
     },
     {
