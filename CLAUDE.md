@@ -16,6 +16,10 @@ resolve providers → depth-first render → styled output.
 - `Provider` — lazy, cached data fetcher (git, pwd, context)
 - Presets — Go functions that return `[]SegmentNode` trees
 
+## First Principles
+
+- A segment renders a specific piece of data with style.
+
 ## Project Structure
 
 - `main.go` — entry point, CLI (cobra), pipeline orchestration
