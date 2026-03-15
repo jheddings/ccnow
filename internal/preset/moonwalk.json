@@ -1,0 +1,64 @@
+{
+  "segments": [
+    {
+      "segment": "pwd.smart",
+      "style": { "color": "white", "bgcolor": "#2D4F2D", "prefix": " \uf07b " }
+    },
+    {
+      "segment": "pwd.name",
+      "style": { "color": "white", "bgcolor": "#2D4F2D", "bold": true, "suffix": " " }
+    },
+    {
+      "segment": "literal",
+      "props": { "text": "\ue0b0" },
+      "style": { "color": "#2D4F2D", "bgcolor": "#1C3A1C" }
+    },
+    {
+      "segment": "git.branch",
+      "style": { "color": "#8FBC8F", "bgcolor": "#1C3A1C", "bold": true, "prefix": " \ue0a0 " }
+    },
+    {
+      "segment": "git.insertions",
+      "style": { "color": "#50FA7B", "bgcolor": "#1C3A1C", "prefix": " +" }
+    },
+    {
+      "segment": "git.deletions",
+      "style": { "color": "#FF6B6B", "bgcolor": "#1C3A1C", "prefix": " -", "suffix": " " }
+    },
+    {
+      "segment": "literal",
+      "props": { "text": "\ue0b0" },
+      "style": { "color": "#1C3A1C", "bgcolor": "#1A2E1A" }
+    },
+    {
+      "segment": "context.tokens",
+      "style": { "color": "#A8D5A8", "bgcolor": "#1A2E1A", "bold": true, "prefix": " \uf0e4 " }
+    },
+    {
+      "segment": "context.size",
+      "style": { "color": "#A8D5A8", "bgcolor": "#1A2E1A", "prefix": "/" }
+    },
+    {
+      "segment": "context.percent",
+      "style": { "color": "#A8D5A8", "bgcolor": "#1A2E1A", "prefix": " (", "suffix": ") " }
+    },
+    {
+      "segment": "literal",
+      "props": { "text": "\ue0b0" },
+      "style": { "color": "#1A2E1A", "bgcolor": "#142814" }
+    },
+    {
+      "segment": "cost.usd",
+      "style": { "color": "#6BBF6B", "bgcolor": "#142814", "bold": true, "prefix": " " }
+    },
+    {
+      "segment": "session.duration",
+      "style": { "color": "#6BBF6B", "bgcolor": "#142814", "prefix": " \uf017 ", "suffix": " " }
+    },
+    {
+      "segment": "literal",
+      "props": { "text": "\ue0b0" },
+      "style": { "color": "#142814" }
+    }
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "segments": [
+    {
+      "segment": "pwd.smart",
+      "style": { "color": "white", "bgcolor": "#DC0000", "prefix": " " }
+    },
+    {
+      "segment": "pwd.name",
+      "style": { "color": "white", "bgcolor": "#DC0000", "bold": true, "suffix": " " }
+    },
+    {
+      "segment": "literal",
+      "props": { "text": "\ue0b0" },
+      "style": { "color": "#DC0000", "bgcolor": "#3A3A3A" }
+    },
+    {
+      "segment": "git.branch",
+      "style": { "color": "white", "bgcolor": "#3A3A3A", "bold": true, "prefix": " \ue0a0 " }
+    },
+    {
+      "segment": "git.insertions",
+      "style": { "color": "#50FA7B", "bgcolor": "#3A3A3A", "prefix": " +" }
+    },
+    {
+      "segment": "git.deletions",
+      "style": { "color": "#FF6B6B", "bgcolor": "#3A3A3A", "prefix": " -", "suffix": " " }
+    },
+    {
+      "segment": "literal",
+      "props": { "text": "\ue0b0" },
+      "style": { "color": "#3A3A3A" }
+    },
+    {
+      "segment": "newline"
+    },
+    {
+      "segment": "model.name",
+      "style": { "color": "white", "bgcolor": "#003DA5", "bold": true, "prefix": " ", "suffix": " " }
+    },
+    {
+      "segment": "literal",
+      "props": { "text": "\ue0b0" },
+      "style": { "color": "#003DA5", "bgcolor": "#2D2D2D" }
+    },
+    {
+      "segment": "context.tokens",
+      "style": { "color": "white", "bgcolor": "#2D2D2D", "bold": true, "prefix": " " }
+    },
+    {
+      "segment": "context.size",
+      "style": { "color": "white", "bgcolor": "#2D2D2D", "prefix": "/" }
+    },
+    {
+      "segment": "context.percent",
+      "style": { "color": "white", "bgcolor": "#2D2D2D", "prefix": " (", "suffix": ") " }
+    },
+    {
+      "segment": "literal",
+      "props": { "text": "\ue0b0" },
+      "style": { "color": "#2D2D2D", "bgcolor": "#006633" }
+    },
+    {
+      "segment": "cost.usd",
+      "style": { "color": "white", "bgcolor": "#006633", "bold": true, "prefix": " ", "suffix": " " }
+    },
+    {
+      "segment": "literal",
+      "props": { "text": "\ue0b0" },
+      "style": { "color": "#006633", "bgcolor": "#FF8000" }
+    },
+    {
+      "segment": "session.duration",
+      "style": { "color": "black", "bgcolor": "#FF8000", "bold": true, "prefix": " ", "suffix": " " }
+    },
+    {
+      "segment": "literal",
+      "props": { "text": "\ue0b0" },
+      "style": { "color": "#FF8000", "bgcolor": "#3A3A3A" }
+    },
+    {
+      "segment": "session.lines-added",
+      "style": { "color": "#50FA7B", "bgcolor": "#3A3A3A", "prefix": " +" }
+    },
+    {
+      "segment": "session.lines-removed",
+      "style": { "color": "#FF6B6B", "bgcolor": "#3A3A3A", "prefix": " -", "suffix": " " }
+    },
+    {
+      "segment": "literal",
+      "props": { "text": "\ue0b0" },
+      "style": { "color": "#3A3A3A" }
+    }
+  ]
+}

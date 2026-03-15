@@ -36,8 +36,9 @@ func Apply(value string, attrs *types.StyleAttrs) string {
 		}
 
 		colorCode := resolveColor(attrs.Color)
-		if colorCode != "" || mods.Len() > 0 {
-			return ansiReset + mods.String() + colorCode + value + ansiReset
+		bgCode := resolveBgColor(attrs.Background)
+		if colorCode != "" || bgCode != "" || mods.Len() > 0 {
+			return ansiReset + mods.String() + colorCode + bgCode + value + ansiReset
 		}
 	}
 
