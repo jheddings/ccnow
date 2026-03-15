@@ -10,6 +10,7 @@ func RegisterBuiltin(registry *Registry) {
 	registry.Register(&modelProvider{})
 	registry.Register(&costProvider{})
 	registry.Register(&sessionProvider{})
+	registry.Register(&speedProvider{})
 }
 
 // Registry maps provider names to their implementations.

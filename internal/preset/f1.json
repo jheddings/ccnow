@@ -68,7 +68,11 @@
     },
     {
       "segment": "context.percent",
-      "style": { "color": "white", "bgcolor": "#2D2D2D", "prefix": " (", "suffix": ") " }
+      "style": { "color": "white", "bgcolor": "#2D2D2D", "prefix": " (", "suffix": ")" }
+    },
+    {
+      "segment": "speed.output",
+      "style": { "color": "#50FA7B", "bgcolor": "#2D2D2D", "prefix": " \uf0e7 ", "suffix": " " }
     },
     {
       "segment": "literal",

@@ -11,6 +11,8 @@ type ContextData struct {
 	Tokens  string
 	Size    string
 	Percent *int
+	Input   string
+	Output  string
 }
 
 type contextProvider struct{}
@@ -41,6 +43,16 @@ func (p *contextProvider) Resolve(session *types.SessionData) (any, error) {
 	if cw.UsedPercentage > 0 || cw.CurrentUsage != nil {
 		pct := cw.UsedPercentage
 		data.Percent = &pct
+	}
+
+	if cw.TotalInputTokens != nil {
+		data.Input = FormatTokens(*cw.TotalInputTokens)
+	} else if totalTokens > 0 {
+		data.Input = FormatTokens(totalTokens)
+	}
+
+	if cw.TotalOutputTokens != nil {
+		data.Output = FormatTokens(*cw.TotalOutputTokens)
 	}
 
 	return data, nil

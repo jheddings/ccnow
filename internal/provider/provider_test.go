@@ -81,6 +81,67 @@ func TestContextProvider(t *testing.T) {
 	}
 }
 
+func TestContextProviderWithTotalTokens(t *testing.T) {
+	p := &contextProvider{}
+	inputTokens := 50000
+	outputTokens := 8000
+	sess := &types.SessionData{
+		CWD: "/tmp",
+		ContextWindow: &types.ContextWindow{
+			UsedPercentage:    36,
+			ContextWindowSize: 1000000,
+			TotalInputTokens:  &inputTokens,
+			TotalOutputTokens: &outputTokens,
+			CurrentUsage: &types.CurrentUsage{
+				InputTokens:              100,
+				CacheCreationInputTokens: 200,
+				CacheReadInputTokens:     300,
+			},
+		},
+	}
+
+	result, err := p.Resolve(sess)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	data := result.(*ContextData)
+	if data.Input != "50K" {
+		t.Errorf("expected Input 50K, got %s", data.Input)
+	}
+	if data.Output != "8K" {
+		t.Errorf("expected Output 8K, got %s", data.Output)
+	}
+}
+
+func TestContextProviderInputFallback(t *testing.T) {
+	p := &contextProvider{}
+	sess := &types.SessionData{
+		CWD: "/tmp",
+		ContextWindow: &types.ContextWindow{
+			UsedPercentage: 10,
+			CurrentUsage: &types.CurrentUsage{
+				InputTokens:              100,
+				CacheCreationInputTokens: 200,
+				CacheReadInputTokens:     300,
+			},
+		},
+	}
+
+	result, err := p.Resolve(sess)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	data := result.(*ContextData)
+	if data.Input != "600" {
+		t.Errorf("expected Input 600, got %s", data.Input)
+	}
+	if data.Output != "" {
+		t.Errorf("expected empty Output, got %s", data.Output)
+	}
+}
+
 func TestCostProvider(t *testing.T) {
 	p := &costProvider{}
 	sess := &types.SessionData{
