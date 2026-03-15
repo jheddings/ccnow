@@ -1,13 +1,38 @@
 {
   "segments": [
-    {"segment": "pwd.name", "style": {"color": "39"}},
-    {"segment": "git.branch", "style": {"color": "whiteBright", "bold": true, "prefix": " | "}},
+    {
+      "segment": "pwd.name",
+      "style": {
+        "color": "39"
+      }
+    },
+    {
+      "segment": "git.branch",
+      "style": {
+        "color": "whiteBright",
+        "bold": true,
+        "prefix": " | "
+      }
+    },
     {
       "segment": "group",
-      "style": {"prefix": " | "},
+      "style": {
+        "prefix": " | "
+      },
       "children": [
-        {"segment": "context.tokens", "style": {"color": "white"}},
-        {"segment": "context.size", "style": {"color": "white", "prefix": "/"}}
+        {
+          "segment": "context.tokens",
+          "style": {
+            "color": "white"
+          }
+        },
+        {
+          "segment": "context.size",
+          "style": {
+            "color": "white",
+            "prefix": "/"
+          }
+        }
       ]
     }
   ]

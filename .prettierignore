@@ -1,0 +1,8 @@
+# Build outputs
+dist
+
+# Go files (handled by gofmt)
+*.go
+
+# Binaries
+ccglow
