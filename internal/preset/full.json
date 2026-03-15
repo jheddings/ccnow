@@ -61,6 +61,13 @@
       "children": [
         {
           "segment": "model.name"
+        },
+        {
+          "segment": "model.id",
+          "style": {
+            "color": "240",
+            "prefix": " "
+          }
         }
       ]
     },
@@ -92,6 +99,14 @@
             "prefix": " (",
             "suffix": ")"
           }
+        },
+        {
+          "segment": "context.remaining",
+          "style": {
+            "color": "white",
+            "prefix": " [",
+            "suffix": " free]"
+          }
         }
       ]
     },
@@ -117,7 +132,29 @@
       },
       "children": [
         {
-          "segment": "session.duration",
+          "segment": "claude.version",
+          "style": {
+            "color": "240",
+            "prefix": "v"
+          }
+        },
+        {
+          "segment": "claude.style",
+          "style": {
+            "color": "cyan",
+            "prefix": " · "
+          }
+        }
+      ]
+    },
+    {
+      "segment": "group",
+      "style": {
+        "prefix": " · "
+      },
+      "children": [
+        {
+          "segment": "session.duration.total",
           "style": {
             "color": "magenta",
             "prefix": "\uf017 "

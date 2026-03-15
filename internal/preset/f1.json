@@ -89,7 +89,7 @@
       "style": { "color": "#006633", "bgcolor": "#FF8000" }
     },
     {
-      "segment": "session.duration",
+      "segment": "session.duration.total",
       "style": { "color": "black", "bgcolor": "#FF8000", "bold": true, "prefix": " \uf017 ", "suffix": " " }
     },
     {

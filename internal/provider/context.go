@@ -8,11 +8,12 @@ import (
 
 // ContextData holds resolved context window information.
 type ContextData struct {
-	Tokens  string `segment:"context.tokens"`
-	Size    string `segment:"context.size"`
-	Percent *int   `segment:"context.percent,format:%d%%"`
-	Input   string `segment:"context.input"`
-	Output  string `segment:"context.output"`
+	Tokens    string `segment:"context.tokens"`
+	Size      string `segment:"context.size"`
+	Percent   *int   `segment:"context.percent,format:%d%%"`
+	Remaining *int   `segment:"context.remaining,format:%d%%"`
+	Input     string `segment:"context.input"`
+	Output    string `segment:"context.output"`
 }
 
 func (p *contextProvider) Fields() any { return &ContextData{} }
@@ -45,6 +46,11 @@ func (p *contextProvider) Resolve(session *types.SessionData) (any, error) {
 	if cw.UsedPercentage > 0 || cw.CurrentUsage != nil {
 		pct := cw.UsedPercentage
 		data.Percent = &pct
+	}
+
+	if cw.RemainingPercentage > 0 || cw.CurrentUsage != nil {
+		rem := cw.RemainingPercentage
+		data.Remaining = &rem
 	}
 
 	if cw.TotalInputTokens != nil {

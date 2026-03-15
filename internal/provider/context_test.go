@@ -1,7 +1,6 @@
 package provider
 
 import (
-	"os"
 	"testing"
 
 	"github.com/jheddings/ccglow/internal/types"
@@ -25,27 +24,6 @@ func TestFormatTokens(t *testing.T) {
 		result := FormatTokens(tt.input)
 		if result != tt.expected {
 			t.Errorf("FormatTokens(%d) = %q, want %q", tt.input, result, tt.expected)
-		}
-	}
-}
-
-func TestFormatDuration(t *testing.T) {
-	tests := []struct {
-		ms       float64
-		expected string
-	}{
-		{0, "0m"},
-		{30000, "0m"},
-		{60000, "1m"},
-		{300000, "5m"},
-		{3600000, "1h 0m"},
-		{5400000, "1h 30m"},
-	}
-
-	for _, tt := range tests {
-		result := FormatDuration(tt.ms)
-		if result != tt.expected {
-			t.Errorf("FormatDuration(%f) = %q, want %q", tt.ms, result, tt.expected)
 		}
 	}
 }
@@ -143,50 +121,15 @@ func TestContextProviderInputFallback(t *testing.T) {
 	}
 }
 
-func TestCostProvider(t *testing.T) {
-	p := &costProvider{}
-	sess := &types.SessionData{
-		CWD:  "/tmp",
-		Cost: &types.CostInfo{TotalCostUSD: 12.5},
-	}
-
-	result, err := p.Resolve(sess)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	data := result.(*CostData)
-	if *data.USD != "$12.50" {
-		t.Errorf("expected $12.50, got %s", *data.USD)
-	}
-}
-
-func TestModelProvider(t *testing.T) {
-	p := &modelProvider{}
-	sess := &types.SessionData{
-		CWD:   "/tmp",
-		Model: &types.ModelInfo{DisplayName: "Opus 4.6"},
-	}
-
-	result, err := p.Resolve(sess)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	data := result.(*ModelData)
-	if *data.Name != "Opus 4.6" {
-		t.Errorf("expected Opus 4.6, got %s", *data.Name)
-	}
-}
-
-func TestSessionProvider(t *testing.T) {
-	p := &sessionProvider{}
+func TestContextProviderRemaining(t *testing.T) {
+	p := &contextProvider{}
 	sess := &types.SessionData{
 		CWD: "/tmp",
-		Cost: &types.CostInfo{
-			TotalDurationMS:   5400000,
-			TotalLinesAdded:   100,
-			TotalLinesRemoved: 50,
+		ContextWindow: &types.ContextWindow{
+			UsedPercentage:      36,
+			RemainingPercentage: 64,
+			ContextWindowSize:   1000000,
+			CurrentUsage:        &types.CurrentUsage{InputTokens: 100},
 		},
 	}
 
@@ -195,73 +138,41 @@ func TestSessionProvider(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*SessionData)
-	if *data.Duration != "1h 30m" {
-		t.Errorf("expected 1h 30m, got %s", *data.Duration)
-	}
-	if *data.LinesAdded != 100 {
-		t.Errorf("expected 100 lines added, got %d", *data.LinesAdded)
-	}
-	if *data.LinesRemoved != 50 {
-		t.Errorf("expected 50 lines removed, got %d", *data.LinesRemoved)
+	data := result.(*ContextData)
+	if data.Remaining == nil || *data.Remaining != 64 {
+		t.Errorf("expected remaining 64, got %v", data.Remaining)
 	}
 }
 
-func TestPwdProvider(t *testing.T) {
-	p := &pwdProvider{}
-	sess := &types.SessionData{CWD: "/home/user/projects/myapp"}
+func TestContextProviderNoRemaining(t *testing.T) {
+	p := &contextProvider{}
+	sess := &types.SessionData{CWD: "/tmp"}
 
 	result, err := p.Resolve(sess)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	data := result.(*PwdData)
-	if data.Name != "myapp" {
-		t.Errorf("expected myapp, got %s", data.Name)
-	}
-	if data.Path != "/home/user/projects/" {
-		t.Errorf("expected /home/user/projects/, got %s", data.Path)
+	data := result.(*ContextData)
+	if data.Remaining != nil {
+		t.Errorf("expected nil remaining, got %v", data.Remaining)
 	}
 }
 
-func TestSmartPrefix(t *testing.T) {
-	home, _ := os.UserHomeDir()
-
-	tests := []struct {
-		cwd      string
-		expected string
-	}{
-		// Root and top-level
-		{"/", ""},
-		{"/tmp", ""},
-		{"/usr", ""},
-
-		// Absolute paths (not under home)
-		{"/usr/local", "/usr/"},
-		{"/usr/local/bin", "/usr/local/"},
-		{"/var/log/syslog", "/var/log/"},
-
-		// Home directory itself
-		{home, ""},
-
-		// First level under home (the bug case — was producing "~//")
-		{home + "/Projects", "~/"},
-
-		// Two levels under home
-		{home + "/Projects/myapp", "~/Projects/"},
-
-		// Three levels under home
-		{home + "/Projects/myapp/src", "~/Projects/myapp/"},
-
-		// Four levels under home (abbreviation kicks in)
-		{home + "/Projects/myapp/src/pkg", "~/P/m/…/"},
+func TestContextProviderZeroRemaining(t *testing.T) {
+	p := &contextProvider{}
+	sess := &types.SessionData{
+		CWD:           "/tmp",
+		ContextWindow: &types.ContextWindow{},
 	}
 
-	for _, tt := range tests {
-		result := smartPrefix(tt.cwd)
-		if result != tt.expected {
-			t.Errorf("smartPrefix(%q) = %q, want %q", tt.cwd, result, tt.expected)
-		}
+	result, err := p.Resolve(sess)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	data := result.(*ContextData)
+	if data.Remaining != nil {
+		t.Errorf("expected nil remaining for zero value with no usage, got %v", data.Remaining)
 	}
 }

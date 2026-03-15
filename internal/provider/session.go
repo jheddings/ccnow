@@ -8,9 +8,11 @@ import (
 
 // SessionData holds resolved session timing and line-change data.
 type SessionData struct {
-	Duration     *string `segment:"session.duration"`
+	Duration     *string `segment:"session.duration.total"`
+	APIDuration  *string `segment:"session.duration.api"`
 	LinesAdded   *int    `segment:"session.lines-added"`
 	LinesRemoved *int    `segment:"session.lines-removed"`
+	ID           *string `segment:"session.id"`
 }
 
 func (p *sessionProvider) Fields() any { return &SessionData{} }
@@ -21,12 +23,20 @@ func (p *sessionProvider) Name() string { return "session" }
 
 func (p *sessionProvider) Resolve(session *types.SessionData) (any, error) {
 	data := &SessionData{}
+
+	if session.SessionID != "" {
+		data.ID = &session.SessionID
+	}
+
 	if session.Cost == nil {
 		return data, nil
 	}
 
 	dur := FormatDuration(session.Cost.TotalDurationMS)
 	data.Duration = &dur
+
+	apiDur := FormatDuration(session.Cost.TotalAPIDurationMS)
+	data.APIDuration = &apiDur
 
 	if session.Cost.TotalLinesAdded > 0 {
 		n := session.Cost.TotalLinesAdded
