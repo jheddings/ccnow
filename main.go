@@ -85,12 +85,19 @@ func run(presetName, configPath, format, stdin string) string {
 	providers := provider.NewRegistry()
 	provider.RegisterBuiltin(providers)
 
+	tagIdx, err := render.BuildTagIndex(providers.All())
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "ccglow: tag index error: %v\n", err)
+		return ""
+	}
+
 	tree := resolveTree(presetName, configPath)
 
-	providerNames := render.CollectProviderNames(tree)
+	providerNames := render.CollectProviderNames(tree, tagIdx)
 	providerData := render.ResolveProviders(providerNames, providers.All(), sess)
+	segmentValues := render.ResolveSegmentValues(tagIdx, providerData)
 
-	return render.Tree(tree, segments, sess, providerData)
+	return render.Tree(tree, segments, sess, providerData, segmentValues, tagIdx)
 }
 
 func resolveTree(presetName, configPath string) []types.SegmentNode {
