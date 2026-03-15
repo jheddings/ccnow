@@ -26,30 +26,43 @@
           "style": {
             "color": "whiteBright",
             "bold": true,
-            "prefix": " "
+            "prefix": "\ue0a0 "
           }
         },
         {
-          "segment": "git.insertions",
+          "segment": "group",
           "style": {
-            "color": "green",
-            "prefix": " · +"
-          }
-        },
-        {
-          "segment": "git.deletions",
-          "style": {
-            "color": "red",
-            "prefix": " -"
-          }
+            "prefix": " · "
+          },
+          "children": [
+            {
+              "segment": "git.insertions",
+              "style": {
+                "color": "green",
+                "prefix": "+"
+              }
+            },
+            {
+              "segment": "git.deletions",
+              "style": {
+                "color": "red",
+                "prefix": " -"
+              }
+            }
+          ]
         }
       ]
     },
     {
-      "segment": "model.name",
+      "segment": "group",
       "style": {
         "prefix": " | "
-      }
+      },
+      "children": [
+        {
+          "segment": "model.name"
+        }
+      ]
     },
     {
       "segment": "group",
@@ -83,19 +96,34 @@
       ]
     },
     {
-      "segment": "cost.usd",
+      "segment": "group",
       "style": {
-        "color": "yellow",
-        "bold": true,
         "prefix": " · "
-      }
+      },
+      "children": [
+        {
+          "segment": "cost.usd",
+          "style": {
+            "color": "yellow",
+            "bold": true
+          }
+        }
+      ]
     },
     {
-      "segment": "session.duration",
+      "segment": "group",
       "style": {
-        "color": "magenta",
-        "prefix": " · \uf017 "
-      }
+        "prefix": " · "
+      },
+      "children": [
+        {
+          "segment": "session.duration",
+          "style": {
+            "color": "magenta",
+            "prefix": "\uf017 "
+          }
+        }
+      ]
     },
     {
       "segment": "group",
