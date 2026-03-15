@@ -20,6 +20,8 @@ func RegisterBuiltin(registry *Registry) {
 	registry.Register(&gitModifiedSegment{})
 	registry.Register(&gitStagedSegment{})
 	registry.Register(&gitUntrackedSegment{})
+	registry.Register(&gitOwnerSegment{})
+	registry.Register(&gitRepoSegment{})
 	registry.Register(&gitWorktreeSegment{})
 	registry.Register(&contextTokensSegment{})
 	registry.Register(&contextSizeSegment{})
@@ -171,6 +173,26 @@ func (s *gitUntrackedSegment) Render(ctx *types.SegmentContext) *string {
 	if data, ok := ctx.Provider.(*provider.GitData); ok && data != nil && data.Untracked != nil {
 		v := fmt.Sprintf("%d", *data.Untracked)
 		return &v
+	}
+	return nil
+}
+
+type gitOwnerSegment struct{}
+
+func (s *gitOwnerSegment) Name() string { return "git.owner" }
+func (s *gitOwnerSegment) Render(ctx *types.SegmentContext) *string {
+	if data, ok := ctx.Provider.(*provider.GitData); ok && data != nil {
+		return data.Owner
+	}
+	return nil
+}
+
+type gitRepoSegment struct{}
+
+func (s *gitRepoSegment) Name() string { return "git.repo" }
+func (s *gitRepoSegment) Render(ctx *types.SegmentContext) *string {
+	if data, ok := ctx.Provider.(*provider.GitData); ok && data != nil {
+		return data.Repo
 	}
 	return nil
 }

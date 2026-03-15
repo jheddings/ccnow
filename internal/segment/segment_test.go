@@ -84,6 +84,46 @@ func TestGitUntrackedSegment(t *testing.T) {
 	}
 }
 
+func TestGitOwnerSegment(t *testing.T) {
+	seg := &gitOwnerSegment{}
+	if seg.Name() != "git.owner" {
+		t.Errorf("expected name git.owner, got %s", seg.Name())
+	}
+
+	owner := "jheddings"
+	ctx := &types.SegmentContext{Provider: &provider.GitData{Owner: &owner}}
+	result := seg.Render(ctx)
+	if result == nil || *result != "jheddings" {
+		t.Errorf("expected 'jheddings', got %v", result)
+	}
+
+	ctx = &types.SegmentContext{Provider: &provider.GitData{}}
+	result = seg.Render(ctx)
+	if result != nil {
+		t.Errorf("expected nil, got %v", *result)
+	}
+}
+
+func TestGitRepoSegment(t *testing.T) {
+	seg := &gitRepoSegment{}
+	if seg.Name() != "git.repo" {
+		t.Errorf("expected name git.repo, got %s", seg.Name())
+	}
+
+	repo := "ccglow"
+	ctx := &types.SegmentContext{Provider: &provider.GitData{Repo: &repo}}
+	result := seg.Render(ctx)
+	if result == nil || *result != "ccglow" {
+		t.Errorf("expected 'ccglow', got %v", result)
+	}
+
+	ctx = &types.SegmentContext{Provider: &provider.GitData{}}
+	result = seg.Render(ctx)
+	if result != nil {
+		t.Errorf("expected nil, got %v", *result)
+	}
+}
+
 func TestGitWorktreeSegment(t *testing.T) {
 	seg := &gitWorktreeSegment{}
 	if seg.Name() != "git.worktree" {
