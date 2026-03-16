@@ -14,6 +14,8 @@ import (
 	"github.com/jheddings/ccglow/internal/session"
 	"github.com/jheddings/ccglow/internal/style"
 	"github.com/jheddings/ccglow/internal/types"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -22,12 +24,33 @@ var (
 	configPath string
 	format     string
 	tee        string
+	logPath    string
+	verbose    bool
 )
 
 var rootCmd = &cobra.Command{
 	Use:   "ccglow",
 	Short: "Composable statusline for Claude Code",
 	Long:  "Reads session JSON from stdin, outputs styled statusline to stdout.",
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		if logPath == "" {
+			log.Logger = zerolog.Nop()
+		} else {
+			f, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+			if err != nil {
+				return fmt.Errorf("failed to open log file: %w", err)
+			}
+			log.Logger = zerolog.New(f).With().Timestamp().Logger()
+		}
+
+		if verbose {
+			zerolog.SetGlobalLevel(zerolog.DebugLevel)
+		} else {
+			zerolog.SetGlobalLevel(zerolog.InfoLevel)
+		}
+
+		return nil
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		stdinBytes, err := io.ReadAll(os.Stdin)
 		if err != nil {
@@ -36,7 +59,7 @@ var rootCmd = &cobra.Command{
 
 		if tee != "" {
 			if err := os.WriteFile(tee, stdinBytes, 0644); err != nil {
-				fmt.Fprintf(os.Stderr, "ccglow: failed to write tee file: %v\n", err)
+				log.Error().Err(err).Msg("failed to write tee file")
 			}
 		}
 
@@ -54,6 +77,9 @@ func init() {
 	rootCmd.Flags().StringVar(&configPath, "config", "", "Load JSON config file")
 	rootCmd.Flags().StringVar(&format, "format", "ansi", "Output format: ansi, plain")
 	rootCmd.Flags().StringVar(&tee, "tee", "", "Write raw stdin JSON to file before processing")
+
+	rootCmd.PersistentFlags().StringVar(&logPath, "log", "", "Write logs to file (no logging when omitted)")
+	rootCmd.PersistentFlags().BoolVar(&verbose, "verbose", false, "Set log level to debug")
 
 	rootCmd.SetVersionTemplate("{{.Version}}\n")
 	rootCmd.SilenceUsage = true
@@ -82,8 +108,10 @@ func Version() string {
 func run(presetName, configPath, format, stdin string) string {
 	sess := session.Parse(stdin)
 	if sess == nil {
+		log.Warn().Msg("failed to parse session")
 		return ""
 	}
+	log.Debug().Str("cwd", sess.CWD).Msg("session parsed")
 
 	if format == "plain" {
 		style.SetColorLevel(0)
@@ -100,37 +128,49 @@ func run(presetName, configPath, format, stdin string) string {
 
 	tagIdx, err := render.BuildTagIndex(providers.All())
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "ccglow: tag index error: %v\n", err)
+		log.Error().Err(err).Msg("tag index error")
 		return ""
 	}
 
 	tree := resolveTree(presetName, configPath)
+	log.Debug().Int("count", len(tree)).Msg("tree resolved")
 
 	providerNames := render.CollectProviderNames(tree, tagIdx)
+	log.Debug().Int("count", len(providerNames)).Msg("providers collected")
+
 	providerData := render.ResolveProviders(providerNames, providers.All(), sess)
 	segmentValues := render.ResolveSegmentValues(tagIdx, providerData)
 
-	return render.Tree(tree, segments, sess, providerData, segmentValues, tagIdx)
+	output := render.Tree(tree, segments, sess, providerData, segmentValues, tagIdx)
+	log.Debug().Msg("render complete")
+
+	return output
 }
 
 func resolveTree(presetName, configPath string) []types.SegmentNode {
 	if configPath != "" {
 		data, err := os.ReadFile(configPath)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "ccglow: failed to load config: %v\n", err)
+			log.Error().Err(err).Str("path", configPath).Msg("failed to load config")
 		} else {
+			log.Debug().Int("bytes", len(data)).Str("path", configPath).Msg("config file read")
 			tree, err := config.Parse(data)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "ccglow: failed to parse config: %v\n", err)
+				log.Error().Err(err).Str("path", configPath).Msg("failed to parse config")
 			} else if len(tree) > 0 {
+				log.Debug().Int("count", len(tree)).Str("path", configPath).Msg("config tree parsed")
 				return tree
+			} else {
+				log.Warn().Str("path", configPath).Msg("config file produced empty tree")
 			}
 		}
 	}
 
 	if tree := preset.Get(presetName); tree != nil {
+		log.Debug().Str("preset", presetName).Msg("using preset")
 		return tree
 	}
 
+	log.Debug().Msg("falling back to default preset")
 	return preset.Get("default")
 }
