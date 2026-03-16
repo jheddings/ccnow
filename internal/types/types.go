@@ -65,6 +65,7 @@ type SegmentNode struct {
 	Type     string         `json:"segment,omitempty"`
 	Provider string         `json:"provider,omitempty"`
 	Format   string         `json:"format,omitempty"`
+	When     string         `json:"when,omitempty"`
 	Enabled  *bool          `json:"enabled,omitempty"`
 	Style    *StyleAttrs    `json:"style,omitempty"`
 	Props    map[string]any `json:"props,omitempty"`

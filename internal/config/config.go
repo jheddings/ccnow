@@ -23,7 +23,7 @@ func Parse(data []byte) ([]types.SegmentNode, error) {
 		if err := json.Unmarshal(raw, &node); err != nil {
 			continue
 		}
-		if node.Type == "" {
+		if node.Type == "" && len(node.Children) == 0 {
 			continue
 		}
 		nodes = append(nodes, node)
