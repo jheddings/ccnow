@@ -234,6 +234,195 @@ func TestTree_EmptyStringCollapses(t *testing.T) {
 	}
 }
 
+func TestTree_DataSegmentWhenPasses(t *testing.T) {
+	style.SetColorLevel(0)
+	defer style.SetColorLevel(1)
+
+	seg := setupTestRegistries()
+	sess := &types.SessionData{CWD: "/tmp"}
+
+	segmentValues := map[string]any{"test.count": 75}
+	tagIdx := TagIndex{"test.count": fieldAccessor{Provider: "test", FieldIndex: 1}}
+
+	tree := []types.SegmentNode{
+		{Type: "test.count", When: "value >= 50"},
+	}
+
+	result := Tree(tree, seg, sess, map[string]any{}, segmentValues, tagIdx)
+	if result != "75" {
+		t.Errorf("expected '75', got %q", result)
+	}
+}
+
+func TestTree_DataSegmentWhenFails(t *testing.T) {
+	style.SetColorLevel(0)
+	defer style.SetColorLevel(1)
+
+	seg := setupTestRegistries()
+	sess := &types.SessionData{CWD: "/tmp"}
+
+	segmentValues := map[string]any{"test.count": 25}
+	tagIdx := TagIndex{"test.count": fieldAccessor{Provider: "test", FieldIndex: 1}}
+
+	tree := []types.SegmentNode{
+		{Type: "test.count", When: "value >= 50"},
+	}
+
+	result := Tree(tree, seg, sess, map[string]any{}, segmentValues, tagIdx)
+	if result != "" {
+		t.Errorf("expected empty (when failed), got %q", result)
+	}
+}
+
+func TestTree_DataSegmentWhenDotField(t *testing.T) {
+	style.SetColorLevel(0)
+	defer style.SetColorLevel(1)
+
+	seg := setupTestRegistries()
+	sess := &types.SessionData{CWD: "/tmp"}
+
+	type testStruct struct {
+		Name  *string
+		Count *int
+	}
+	name := "feature"
+	count := 5
+	providerData := map[string]any{
+		"test": &testStruct{Name: &name, Count: &count},
+	}
+	segmentValues := map[string]any{"test.name": "feature"}
+	tagIdx := TagIndex{"test.name": fieldAccessor{Provider: "test", FieldIndex: 0}}
+
+	tree := []types.SegmentNode{
+		{Type: "test.name", When: ".count > 0"},
+	}
+
+	result := Tree(tree, seg, sess, providerData, segmentValues, tagIdx)
+	if result != "feature" {
+		t.Errorf("expected 'feature', got %q", result)
+	}
+}
+
+func TestTree_DataSegmentWhenText(t *testing.T) {
+	style.SetColorLevel(0)
+	defer style.SetColorLevel(1)
+
+	seg := setupTestRegistries()
+	sess := &types.SessionData{CWD: "/tmp"}
+
+	segmentValues := map[string]any{"test.name": "hello"}
+	tagIdx := TagIndex{"test.name": fieldAccessor{Provider: "test", FieldIndex: 0}}
+
+	tree := []types.SegmentNode{
+		{Type: "test.name", When: "text != ''"},
+	}
+
+	result := Tree(tree, seg, sess, map[string]any{}, segmentValues, tagIdx)
+	if result != "hello" {
+		t.Errorf("expected 'hello', got %q", result)
+	}
+}
+
+func TestTree_CompositeWhen(t *testing.T) {
+	style.SetColorLevel(0)
+	defer style.SetColorLevel(1)
+
+	seg := setupTestRegistries()
+	sess := &types.SessionData{CWD: "/tmp"}
+
+	type testStruct struct {
+		Name *string
+	}
+	name := "main"
+	providerData := map[string]any{
+		"test": &testStruct{Name: &name},
+	}
+	segmentValues := map[string]any{"test.name": "main"}
+	tagIdx := TagIndex{"test.name": fieldAccessor{Provider: "test", FieldIndex: 0}}
+
+	tree := []types.SegmentNode{
+		{
+			Provider: "test",
+			When:     ".name != ''",
+			Children: []types.SegmentNode{
+				{Type: "test.name"},
+			},
+		},
+	}
+
+	result := Tree(tree, seg, sess, providerData, segmentValues, tagIdx)
+	if result != "main" {
+		t.Errorf("expected 'main', got %q", result)
+	}
+}
+
+func TestTree_CompositeWhenFails(t *testing.T) {
+	seg := setupTestRegistries()
+	sess := &types.SessionData{CWD: "/tmp"}
+
+	type testStruct struct {
+		Name *string
+	}
+	name := ""
+	providerData := map[string]any{
+		"test": &testStruct{Name: &name},
+	}
+	segmentValues := map[string]any{"test.name": ""}
+	tagIdx := TagIndex{"test.name": fieldAccessor{Provider: "test", FieldIndex: 0}}
+
+	tree := []types.SegmentNode{
+		{
+			Provider: "test",
+			When:     ".name != ''",
+			Children: []types.SegmentNode{
+				{Type: "literal", Props: map[string]any{"text": "should not appear"}},
+			},
+		},
+	}
+
+	result := Tree(tree, seg, sess, providerData, segmentValues, tagIdx)
+	if result != "" {
+		t.Errorf("expected empty (composite when failed), got %q", result)
+	}
+}
+
+func TestTree_WhenNoExpression(t *testing.T) {
+	style.SetColorLevel(0)
+	defer style.SetColorLevel(1)
+
+	seg := setupTestRegistries()
+	sess := &types.SessionData{CWD: "/tmp"}
+
+	segmentValues := map[string]any{"test.name": "hello"}
+	tagIdx := TagIndex{"test.name": fieldAccessor{Provider: "test", FieldIndex: 0}}
+
+	tree := []types.SegmentNode{
+		{Type: "test.name"},
+	}
+
+	result := Tree(tree, seg, sess, map[string]any{}, segmentValues, tagIdx)
+	if result != "hello" {
+		t.Errorf("expected 'hello', got %q", result)
+	}
+}
+
+func TestTree_WhenInvalidExpression(t *testing.T) {
+	seg := setupTestRegistries()
+	sess := &types.SessionData{CWD: "/tmp"}
+
+	segmentValues := map[string]any{"test.name": "hello"}
+	tagIdx := TagIndex{"test.name": fieldAccessor{Provider: "test", FieldIndex: 0}}
+
+	tree := []types.SegmentNode{
+		{Type: "test.name", When: ">>>bad<<<"},
+	}
+
+	result := Tree(tree, seg, sess, map[string]any{}, segmentValues, tagIdx)
+	if result != "" {
+		t.Errorf("expected empty (invalid when), got %q", result)
+	}
+}
+
 func TestCollectProviderNames_TagIndex(t *testing.T) {
 	tagIdx := TagIndex{
 		"git.branch":     fieldAccessor{Provider: "git", FieldIndex: 0},

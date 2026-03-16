@@ -1,13 +1,39 @@
 package render
 
 import (
+	"log"
 	"strings"
 	"sync"
 
+	"github.com/jheddings/ccglow/internal/condition"
 	"github.com/jheddings/ccglow/internal/segment"
 	"github.com/jheddings/ccglow/internal/style"
 	"github.com/jheddings/ccglow/internal/types"
 )
+
+var conditionCache = make(map[string]*condition.Condition)
+var conditionMu sync.Mutex
+
+func getCondition(expr string) *condition.Condition {
+	if expr == "" {
+		return nil
+	}
+	conditionMu.Lock()
+	defer conditionMu.Unlock()
+
+	if c, ok := conditionCache[expr]; ok {
+		return c
+	}
+
+	c, err := condition.Compile(expr)
+	if err != nil {
+		log.Printf("ccglow: invalid when expression %q: %v", expr, err)
+		conditionCache[expr] = nil
+		return nil
+	}
+	conditionCache[expr] = c
+	return c
+}
 
 func isEnabled(node *types.SegmentNode, session *types.SessionData) bool {
 	if node.EnabledFn != nil {
@@ -32,8 +58,23 @@ func renderNode(
 		return nil
 	}
 
-	// SegmentGroup: render children, collapse if all nil
+	// SegmentGroup: evaluate when, then render children
 	if len(node.Children) > 0 {
+		if node.When != "" {
+			c := getCondition(node.When)
+			if c == nil {
+				return nil // compilation failed
+			}
+			var pd any
+			if node.Provider != "" {
+				pd = providerData[node.Provider]
+			}
+			env := condition.BuildEnv(pd, nil, "")
+			if !c.Evaluate(env) {
+				return nil
+			}
+		}
+
 		var parts []string
 		for i := range node.Children {
 			rendered := renderNode(&node.Children[i], segments, session, providerData, segmentValues, tagIdx)
@@ -84,6 +125,22 @@ func renderNode(
 		return nil
 	}
 
+	// Evaluate when expression
+	if node.When != "" {
+		c := getCondition(node.When)
+		if c == nil {
+			return nil // compilation failed
+		}
+		var pd any
+		if accessor, exists := tagIdx[node.Type]; exists {
+			pd = providerData[accessor.Provider]
+		}
+		env := condition.BuildEnv(pd, value, text)
+		if !c.Evaluate(env) {
+			return nil
+		}
+	}
+
 	styled := style.Apply(text, node.Style)
 	return &styled
 }
@@ -123,6 +180,9 @@ func collectNames(nodes []types.SegmentNode, names map[string]bool, idx TagIndex
 		}
 		if accessor, ok := idx[node.Type]; ok {
 			names[accessor.Provider] = true
+		}
+		if node.Provider != "" {
+			names[node.Provider] = true
 		}
 		if len(node.Children) > 0 {
 			collectNames(node.Children, names, idx)
