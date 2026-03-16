@@ -44,27 +44,13 @@ That's it. One binary, no runtime dependencies, no config files required.
 
 Five built-in layouts, from minimal to maximal.
 
-**default** — the essentials: path, branch, diffs, context, duration
-
-```
-~/Projects/ccglow |  main · +5 -3 | 360K (36%) · 2h 15m
-```
-
-**minimal** — just the facts
-
-```
-ccglow | main | 360K/1M
-```
-
-**full** — everything, all at once
-
-```
-~/Projects/ccglow |  main · +5 -3 | Opus 4.6 · 360K/1M (36%) · $12.50 · 2h 15m · +1200 -85
-```
-
-**f1** — multi-line, powerline-styled, truecolor. Requires a [Nerd Font](https://www.nerdfonts.com/).
-
-**moonwalk** — dark forest theme with powerline separators. Also requires a Nerd Font.
+| Preset | Description | Prerequisites |
+|--------|-------------|---------------|
+| [**default**](internal/preset/default.json) | The essentials: path, branch, diffs, context, duration | None |
+| [**minimal**](internal/preset/minimal.json) | Smart and quiet — shows data only when it matters | None |
+| [**full**](internal/preset/full.json) | Everything, all at once | None |
+| [**f1**](internal/preset/f1.json) | Multi-line, powerline-styled, truecolor | [Nerd Font](https://www.nerdfonts.com/), truecolor terminal |
+| [**moonwalk**](internal/preset/moonwalk.json) | Dark forest theme with powerline separators | [Nerd Font](https://www.nerdfonts.com/), truecolor terminal |
 
 Switch presets with `--preset`:
 
@@ -81,49 +67,42 @@ Presets are just starting points. Use `--config` to load your own layout:
 ccglow --config ~/.claude/ccglow.json
 ```
 
-A config is a JSON file with a `segments` array. Each segment has a type, optional style, and optional children:
+A config is a JSON file with a `segments` array. Each segment has a type,
+optional style, optional format, and optional conditional visibility:
 
 ```json
 {
   "segments": [
+    { "segment": "pwd.name", "style": { "color": "39", "bold": true } },
     {
-      "segment": "pwd.smart",
-      "style": { "color": "31" }
+      "segment": "git.branch",
+      "when": ".branch != '' && .branch != 'main'",
+      "style": { "color": "whiteBright", "bold": true, "prefix": " | " }
     },
     {
-      "segment": "pwd.name",
-      "style": { "color": "39", "bold": true }
+      "segment": "git.modified",
+      "when": "value > 0",
+      "format": "+%d",
+      "style": { "color": "yellow", "prefix": " " }
     },
     {
-      "segment": "git",
-      "style": { "prefix": " | ", "color": "240" },
-      "children": [
-        {
-          "segment": "git.branch",
-          "style": { "color": "whiteBright", "bold": true, "prefix": "\ue0a0 " }
-        },
-        {
-          "segment": "git.insertions",
-          "style": { "color": "green", "prefix": " +" }
-        },
-        {
-          "segment": "git.deletions",
-          "style": { "color": "red", "prefix": " -" }
-        }
-      ]
+      "segment": "context.percent.used",
+      "when": ".percent >= 50",
+      "style": { "color": "yellow", "prefix": " | " }
     }
   ]
 }
 ```
 
-Groups auto-collapse when all their children are empty — no dangling
-separators, no ghost brackets. If there's no git repo, the git group just
-disappears.
+Segments auto-collapse when they have no data. Groups collapse when all
+children are empty. The `when` clause adds conditional logic — show a
+segment only when its data meets a condition.
 
 For the full reference:
 
-- 📖 **[Segment Reference](docs/SEGMENTS.md)** — all available segments, what they render, special properties
+- 📖 **[Segment Reference](docs/SEGMENTS.md)** — all available segments, format strings, properties
 - 🎨 **[Style Reference](docs/STYLE.md)** — colors, attributes, formatting options
+- 🔀 **[Conditional Visibility](docs/WHEN.md)** — `when` expressions, operators, examples
 
 ## ⌨️ CLI Options
 

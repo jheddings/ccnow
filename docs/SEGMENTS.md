@@ -40,13 +40,14 @@ and handle both SSH and HTTPS formats.
 
 ## Context — `context`
 
-| Segment           | Description                            | Example Output |
-| ----------------- | -------------------------------------- | -------------- |
-| `context.tokens`  | Total token count, human-formatted     | `360K`, `1.2M` |
-| `context.size`    | Context window capacity                | `1M`, `200K`   |
-| `context.percent` | Usage as integer percentage            | `36%`          |
-| `context.input`   | Total input tokens, human-formatted    | `162K`         |
-| `context.output`  | Total output tokens, human-formatted   | `45K`          |
+| Segment                     | Description                            | Example Output |
+| --------------------------- | -------------------------------------- | -------------- |
+| `context.tokens`            | Total token count, human-formatted     | `360K`, `1.2M` |
+| `context.size`              | Context window capacity                | `1M`, `200K`   |
+| `context.percent.used`      | Usage as integer percentage            | `36%`          |
+| `context.percent.remaining` | Remaining capacity as percentage       | `64%`          |
+| `context.input`             | Total input tokens, human-formatted    | `162K`         |
+| `context.output`            | Total output tokens, human-formatted   | `45K`          |
 
 Token formatting scales automatically: raw count below 1K, `nK` for thousands,
 `n.nM` for millions.
@@ -56,6 +57,7 @@ Token formatting scales automatically: raw count below 1K, `nK` for thousands,
 | Segment      | Description        | Example Output          |
 | ------------ | ------------------ | ----------------------- |
 | `model.name` | Model display name | `Opus 4.6 (1M context)` |
+| `model.id`   | Model identifier   | `claude-opus-4-6`       |
 
 ## Cost — `cost`
 
@@ -65,24 +67,31 @@ Token formatting scales automatically: raw count below 1K, `nK` for thousands,
 
 ## Speed — `speed`
 
-| Segment        | Description                                    | Example Output |
-| -------------- | ---------------------------------------------- | -------------- |
-| `speed.input`  | Input token throughput                         | `45 t/s`, `1.2K t/s` |
-| `speed.output` | Output token throughput                        | `82 t/s`       |
-| `speed.total`  | Combined input + output throughput             | `127 t/s`      |
+| Segment        | Description                                    | Example Output        |
+| -------------- | ---------------------------------------------- | --------------------- |
+| `speed.input`  | Input token throughput                         | `45 t/s`, `1.2K t/s`  |
+| `speed.output` | Output token throughput                        | `82 t/s`              |
+| `speed.total`  | Combined input + output throughput             | `127 t/s`             |
 
 Speed is calculated from total tokens divided by API duration. Formatting
 scales the same way as tokens: raw below 1K, `n.nK t/s` above.
 
 ## Session — `session`
 
-| Segment                      | Description                          | Example Output |
-| ---------------------------- | ------------------------------------ | -------------- |
-| `session.duration.total`     | Wall-clock session time              | `2h 15m`, `45m`|
-| `session.duration.api`       | Time spent on API calls              | `8m`, `1h 2m`  |
-| `session.id`                 | Session identifier                   | `abc-123`      |
-| `session.lines-added`        | Total lines added this session       | `1380`         |
-| `session.lines-removed`      | Total lines removed this session     | `21`           |
+| Segment                  | Description                          | Example Output  |
+| ------------------------ | ------------------------------------ | --------------- |
+| `session.duration.total` | Wall-clock session time              | `2h 15m`, `45m` |
+| `session.duration.api`   | Time spent on API calls              | `8m`, `1h 2m`   |
+| `session.id`             | Session identifier                   | `abc-123`       |
+| `session.lines-added`    | Total lines added this session       | `1380`          |
+| `session.lines-removed`  | Total lines removed this session     | `21`            |
+
+## Claude — `claude`
+
+| Segment          | Description                        | Example Output |
+| ---------------- | ---------------------------------- | -------------- |
+| `claude.version` | Claude Code application version    | `2.1.75`       |
+| `claude.style`   | Current output style               | `concise`      |
 
 ## Utility Segments
 
@@ -91,8 +100,7 @@ These segments don't use a provider — they're structural.
 | Segment   | Description                                                        |
 | --------- | ------------------------------------------------------------------ |
 | `literal` | Renders static text. Requires a `text` property (see below).       |
-| `newline`  | Renders a line break — use this for multi-line statusline layouts. |
-| `group`   | Container for child segments. Auto-collapses if all children are empty. |
+| `newline` | Renders a line break — use this for multi-line statusline layouts.  |
 
 ### The `literal` segment
 
@@ -107,17 +115,48 @@ These segments don't use a provider — they're structural.
 }
 ```
 
-### Groups and composites
+## Segment Properties
 
-Any segment node can have `children`. When it does, it acts as a composite —
-rendering all children depth-first and collapsing entirely if every child
-produces empty output. Use the `group` type for pure containers, or attach
-children to a data segment to gate a whole section on that provider's
-availability.
+### `format`
+
+Data segments accept an optional `format` string that controls how the raw
+value is displayed. Uses Go's `fmt.Sprintf` syntax.
+
+```json
+{ "segment": "git.insertions", "format": "+%d" }
+{ "segment": "context.percent.used", "format": "(%d%%)" }
+```
+
+If no format is specified, the segment uses its default format (declared in
+the provider) or falls back to the raw value as a string.
+
+### `when`
+
+Any segment can conditionally show or hide based on its data. See
+**[Conditional Visibility](WHEN.md)** for the full reference.
+
+```json
+{ "segment": "git.branch", "when": ".branch != '' && .branch != 'main'" }
+{ "segment": "context.percent.used", "when": ".percent >= 50" }
+{ "segment": "git.modified", "when": "value > 0" }
+```
+
+### `enabled`
+
+Set `"enabled": false` on any node to exclude it from rendering. Disabled nodes
+are skipped entirely, as if they weren't in the tree. Unlike `when`, this is a
+static setting — it doesn't evaluate at runtime.
+
+## Groups and Composites
+
+Any node can have `children`. When it does, it acts as a composite — rendering
+all children depth-first and collapsing entirely if every child produces empty
+output. Use composites for sections that should appear or disappear together.
 
 ```json
 {
-  "segment": "git",
+  "provider": "git",
+  "when": ".branch != ''",
   "style": { "prefix": " | " },
   "children": [
     { "segment": "git.branch", "style": { "bold": true } },
@@ -127,22 +166,13 @@ availability.
 }
 ```
 
-If there's no git repo, the entire group disappears — no stray separators, no
-empty brackets.
-
-### Disabling segments
-
-Set `"enabled": false` on any node to exclude it from rendering. Disabled nodes
-are skipped entirely, as if they weren't in the tree.
+Composites support `when` with an explicit `provider` field, allowing you to
+gate entire sections on a condition. See [WHEN.md](WHEN.md) for details.
 
 ## Provider Auto-Wiring
 
-You don't need to set `"provider"` explicitly. The segment type prefix
-determines the provider automatically:
-
-- `git.branch` → provider `git`
-- `context.tokens` → provider `context`
-- `pwd.name` → provider `pwd`
+You don't need to set `"provider"` explicitly on data segments. The segment
+name maps to its provider automatically via struct tags in the source code.
 
 Each provider fetches its data once and caches it — so ten git segments don't
 mean ten calls to `git status`.
