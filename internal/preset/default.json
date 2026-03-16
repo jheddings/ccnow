@@ -58,7 +58,7 @@
           }
         },
         {
-          "segment": "context.percent",
+          "segment": "context.percent.used",
           "style": {
             "color": "white",
             "prefix": " (",

@@ -67,7 +67,7 @@
       "style": { "color": "white", "bgcolor": "#2D2D2D", "prefix": "/" }
     },
     {
-      "segment": "context.percent",
+      "segment": "context.percent.used",
       "style": { "color": "white", "bgcolor": "#2D2D2D", "prefix": " (", "suffix": ")" }
     },
     {

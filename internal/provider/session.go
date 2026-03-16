@@ -8,12 +8,14 @@ import (
 
 // SessionData holds resolved session timing and line-change data.
 type SessionData struct {
-	Duration     *string
-	APIDuration  *string
-	LinesAdded   *int
-	LinesRemoved *int
-	ID           *string
+	Duration     *string `segment:"session.duration.total"`
+	APIDuration  *string `segment:"session.duration.api"`
+	LinesAdded   *int    `segment:"session.lines-added"`
+	LinesRemoved *int    `segment:"session.lines-removed"`
+	ID           *string `segment:"session.id"`
 }
+
+func (p *sessionProvider) Fields() any { return &SessionData{} }
 
 type sessionProvider struct{}
 

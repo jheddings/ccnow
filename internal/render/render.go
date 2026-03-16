@@ -25,16 +25,18 @@ func renderNode(
 	segments *segment.Registry,
 	session *types.SessionData,
 	providerData map[string]any,
+	segmentValues map[string]any,
+	tagIdx TagIndex,
 ) *string {
 	if !isEnabled(node, session) {
 		return nil
 	}
 
-	// Composite node: render children, collapse if all nil
+	// SegmentGroup: render children, collapse if all nil
 	if len(node.Children) > 0 {
 		var parts []string
 		for i := range node.Children {
-			rendered := renderNode(&node.Children[i], segments, session, providerData)
+			rendered := renderNode(&node.Children[i], segments, session, providerData, segmentValues, tagIdx)
 			if rendered != nil {
 				parts = append(parts, *rendered)
 			}
@@ -47,28 +49,42 @@ func renderNode(
 		return &styled
 	}
 
-	// Atomic node: look up segment and render
+	// Built-in segment: delegate to registered segment (literal, newline)
 	seg := segments.Get(node.Type)
-	if seg == nil {
+	if seg != nil {
+		ctx := &types.SegmentContext{
+			Session: session,
+			Props:   node.Props,
+		}
+
+		value := seg.Render(ctx)
+		if value == nil {
+			return nil
+		}
+		styled := style.Apply(*value, node.Style)
+		return &styled
+	}
+
+	// DataSegment: resolve from segment values
+	value, ok := segmentValues[node.Type]
+	if !ok || value == nil {
 		return nil
 	}
 
-	ctx := &types.SegmentContext{
-		Session: session,
-		Props:   node.Props,
-	}
-	if node.Provider != "" {
-		if data, ok := providerData[node.Provider]; ok {
-			ctx.Provider = data
+	// Resolve format: config override > tag default > none
+	format := node.Format
+	if format == "" {
+		if accessor, exists := tagIdx[node.Type]; exists {
+			format = accessor.DefaultFormat
 		}
 	}
 
-	value := seg.Render(ctx)
-	if value == nil {
+	text := FormatValue(value, format)
+	if text == "" {
 		return nil
 	}
 
-	styled := style.Apply(*value, node.Style)
+	styled := style.Apply(text, node.Style)
 	return &styled
 }
 
@@ -79,10 +95,12 @@ func Tree(
 	segments *segment.Registry,
 	session *types.SessionData,
 	providerData map[string]any,
+	segmentValues map[string]any,
+	tagIdx TagIndex,
 ) string {
 	var parts []string
 	for i := range tree {
-		rendered := renderNode(&tree[i], segments, session, providerData)
+		rendered := renderNode(&tree[i], segments, session, providerData, segmentValues, tagIdx)
 		if rendered != nil {
 			parts = append(parts, *rendered)
 		}
@@ -92,22 +110,22 @@ func Tree(
 
 // CollectProviderNames walks the tree and returns the set of provider
 // names needed for rendering (skipping disabled nodes).
-func CollectProviderNames(tree []types.SegmentNode) map[string]bool {
+func CollectProviderNames(tree []types.SegmentNode, tagIdx TagIndex) map[string]bool {
 	names := make(map[string]bool)
-	collectNames(tree, names)
+	collectNames(tree, names, tagIdx)
 	return names
 }
 
-func collectNames(nodes []types.SegmentNode, names map[string]bool) {
+func collectNames(nodes []types.SegmentNode, names map[string]bool, idx TagIndex) {
 	for _, node := range nodes {
 		if node.Enabled != nil && !*node.Enabled {
 			continue
 		}
-		if node.Provider != "" {
-			names[node.Provider] = true
+		if accessor, ok := idx[node.Type]; ok {
+			names[accessor.Provider] = true
 		}
 		if len(node.Children) > 0 {
-			collectNames(node.Children, names)
+			collectNames(node.Children, names, idx)
 		}
 	}
 }

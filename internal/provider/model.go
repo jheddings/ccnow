@@ -4,9 +4,11 @@ import "github.com/jheddings/ccglow/internal/types"
 
 // ModelData holds resolved model information.
 type ModelData struct {
-	Name *string
-	ID   *string
+	Name *string `segment:"model.name"`
+	ID   *string `segment:"model.id"`
 }
+
+func (p *modelProvider) Fields() any { return &ModelData{} }
 
 type modelProvider struct{}
 

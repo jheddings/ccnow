@@ -10,10 +10,12 @@ import (
 
 // PwdData holds resolved working directory information.
 type PwdData struct {
-	Name  string
-	Path  string
-	Smart string
+	Name  string `segment:"pwd.name"`
+	Path  string `segment:"pwd.path"`
+	Smart string `segment:"pwd.smart"`
 }
+
+func (p *pwdProvider) Fields() any { return &PwdData{} }
 
 type pwdProvider struct{}
 

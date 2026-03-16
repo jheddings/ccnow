@@ -16,16 +16,18 @@ const gitTimeout = 5 * time.Second
 
 // GitData holds resolved git repository information.
 type GitData struct {
-	Branch     *string
-	Insertions *int
-	Deletions  *int
-	Modified   *int
-	Staged     *int
-	Untracked  *int
-	Worktree   *string
-	Owner      *string
-	Repo       *string
+	Branch     *string `segment:"git.branch"`
+	Insertions *int    `segment:"git.insertions"`
+	Deletions  *int    `segment:"git.deletions"`
+	Modified   *int    `segment:"git.modified"`
+	Staged     *int    `segment:"git.staged"`
+	Untracked  *int    `segment:"git.untracked"`
+	Worktree   *string `segment:"git.worktree"`
+	Owner      *string `segment:"git.owner"`
+	Repo       *string `segment:"git.repo"`
 }
+
+func (p *gitProvider) Fields() any { return &GitData{} }
 
 type gitProvider struct{}
 

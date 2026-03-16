@@ -39,7 +39,7 @@
       "style": { "color": "#A8D5A8", "bgcolor": "#1A2E1A", "prefix": "/" }
     },
     {
-      "segment": "context.percent",
+      "segment": "context.percent.used",
       "style": { "color": "#A8D5A8", "bgcolor": "#1A2E1A", "prefix": " (", "suffix": ") " }
     },
     {

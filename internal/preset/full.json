@@ -93,7 +93,7 @@
           }
         },
         {
-          "segment": "context.percent",
+          "segment": "context.percent.used",
           "style": {
             "color": "white",
             "prefix": " (",
@@ -101,7 +101,7 @@
           }
         },
         {
-          "segment": "context.remaining",
+          "segment": "context.percent.remaining",
           "style": {
             "color": "white",
             "prefix": " [",

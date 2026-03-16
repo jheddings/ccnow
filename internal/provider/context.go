@@ -8,13 +8,15 @@ import (
 
 // ContextData holds resolved context window information.
 type ContextData struct {
-	Tokens    string
-	Size      string
-	Percent   *int
-	Remaining *int
-	Input     string
-	Output    string
+	Tokens    string `segment:"context.tokens"`
+	Size      string `segment:"context.size"`
+	Percent   *int   `segment:"context.percent.used,format:%d%%"`
+	Remaining *int   `segment:"context.percent.remaining,format:%d%%"`
+	Input     string `segment:"context.input"`
+	Output    string `segment:"context.output"`
 }
+
+func (p *contextProvider) Fields() any { return &ContextData{} }
 
 type contextProvider struct{}
 

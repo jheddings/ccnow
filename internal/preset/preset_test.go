@@ -36,14 +36,13 @@ func TestGet_Unknown(t *testing.T) {
 	}
 }
 
-func TestGet_InfersProviders(t *testing.T) {
+func TestGet_MinimalHasSegments(t *testing.T) {
 	nodes := Get("minimal")
 	if nodes == nil {
 		t.Fatal("expected minimal preset")
 	}
-	// First segment is pwd.name — provider should be inferred as "pwd"
-	if nodes[0].Provider != "pwd" {
-		t.Errorf("expected inferred provider pwd, got %q", nodes[0].Provider)
+	if len(nodes) == 0 {
+		t.Fatal("expected non-empty segment tree")
 	}
 }
 

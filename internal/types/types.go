@@ -64,6 +64,7 @@ type StyleAttrs struct {
 type SegmentNode struct {
 	Type     string         `json:"segment,omitempty"`
 	Provider string         `json:"provider,omitempty"`
+	Format   string         `json:"format,omitempty"`
 	Enabled  *bool          `json:"enabled,omitempty"`
 	Style    *StyleAttrs    `json:"style,omitempty"`
 	Props    map[string]any `json:"props,omitempty"`
@@ -75,9 +76,8 @@ type SegmentNode struct {
 
 // SegmentContext is passed to Segment.Render with resolved data.
 type SegmentContext struct {
-	Session  *SessionData
-	Provider any
-	Props    map[string]any
+	Session *SessionData
+	Props   map[string]any
 }
 
 // Segment renders a single atomic value.
@@ -90,4 +90,10 @@ type Segment interface {
 type DataProvider interface {
 	Name() string
 	Resolve(session *SessionData) (any, error)
+}
+
+// FieldProvider extends DataProvider with struct tag discovery.
+type FieldProvider interface {
+	DataProvider
+	Fields() any // returns a zero-value struct pointer, e.g., &GitData{}
 }
