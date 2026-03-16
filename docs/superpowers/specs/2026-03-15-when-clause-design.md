@@ -9,11 +9,11 @@ Resolves #1.
 ## Syntax
 
 The `when` field is a string expression on `SegmentNode`, evaluated by
-`expr-lang/expr` against the segment's provider data.
+`expr-lang/expr`.
 
 ```json
 {
-  "segment": "context.percent",
+  "segment": "context.percent.used",
   "when": ".percent >= 50",
   "style": { "color": "red" }
 }
@@ -25,12 +25,13 @@ The `when` field is a string expression on `SegmentNode`, evaluated by
   Registered as variables in the expr environment using dot-prefixed
   lowercase names derived from the provider's exported Go field names.
   Examples: `.percent`, `.insertions`, `.branch`.
-- **`value`** — the segment's raw data value from the provider (before
-  rendering). The type depends on the provider field. No dot prefix —
-  bare word, segment keyword. Evaluated after provider resolution.
-- **`text`** — the segment's rendered text output (the unstyled `*string`
-  returned by `Segment.Render()`), available as a string. Bare word,
-  segment keyword. Evaluated after render.
+- **`value`** — the segment's raw data value from the provider field
+  it maps to (via struct tags). For a data segment like
+  `context.percent.used`, `value` is the `*int` Percent field
+  (dereferenced). Type depends on the provider field.
+- **`text`** — the segment's formatted text output (the result of
+  `FormatValue(value, format)`), available as a string. This is the
+  unstyled display text.
 
 ### Nil pointer coercion
 
@@ -58,25 +59,26 @@ Full `expr-lang/expr` syntax is available:
 - **String ops:** `contains`, `startsWith`, `endsWith`, `matches`
 
 Examples:
-- `".percent >= 50"` — show when context is >= 50%
+- `".percent >= 50"` — show when context usage is >= 50%
 - `".insertions > 0 || .deletions > 0"` — show when there are changes
-- `".branch != 'main'"` — show when not on main (nil branch → `""`, so `"" != "main"` → true; but the git composite would already collapse when not in a repo)
-- `"text != ''"` — show when segment renders something
+- `".branch != ''"` — show when branch data is available
+- `"text != ''"` — show when segment produces display text
 - `"value > 0"` — show when the raw data value is positive
 
 ### Composite nodes
 
-`when` is valid on composite nodes (nodes with `Children`). The
-provider data for the composite is resolved the same way as for atomic
-segments. Dot-field conditions work normally.
+`when` is valid on composite nodes (nodes with `Children`). To use
+`.field` references on a composite, the node must have an explicit
+`provider` field set so the render pipeline knows which provider's
+data to use for the environment.
 
-The `value` and `text` keywords are not meaningful on composite nodes
-since their output is the concatenation of children. If referenced in
-a composite's `when`, `value` evaluates as `nil` and `text` as `""`.
+`value` and `text` are not meaningful on composite nodes. `value`
+evaluates as `nil` (coerced to zero) and `text` as `""`.
 
 Example — hide the entire git group when not in a repo:
 ```json
 {
+  "provider": "git",
   "when": ".branch != ''",
   "children": [
     { "segment": "git.branch", "style": { "prefix": " " } },
@@ -92,7 +94,7 @@ Example — hide the entire git group when not in a repo:
 - Expression evaluates to false → segment returns nil (collapses)
 - Expression compilation fails → treat as false, log to stderr
 - Provider data is nil → all dot-field variables get zero values;
-  `value` still works
+  `value` is coerced to zero
 
 ## SegmentNode Changes
 
@@ -119,20 +121,20 @@ a nil `*Condition` (always true).
 ### `Condition.Evaluate`
 
 ```go
-func (c *Condition) Evaluate(providerData any, renderedValue *string) bool
+func (c *Condition) Evaluate(env map[string]any) bool
 ```
 
-Builds an environment from `providerData` using `BuildEnv`, runs the
-compiled expression, returns true if the result is boolean `true`.
-Any other result type or runtime error returns false.
+Runs the compiled expression against the provided environment map.
+Returns true if the result is boolean `true`. Any other result type
+or runtime error returns false.
 
 ### `BuildEnv`
 
 ```go
-func BuildEnv(providerData any, renderedValue *string) map[string]any
+func BuildEnv(providerData any, value any, text string) map[string]any
 ```
 
-Builds the variable environment from provider data using reflection:
+Builds the variable environment for expression evaluation:
 
 1. If `providerData` is a pointer, dereference to the struct.
 2. For each exported field, register a dot-prefixed lowercase variable
@@ -142,42 +144,70 @@ Builds the variable environment from provider data using reflection:
    - `*string` nil → `""`, non-nil → `string` value
    - `*float64` nil → `0.0`, non-nil → `float64` value
 4. Non-pointer fields registered as-is.
-5. Register `value`: for atomic segments, this is the raw provider
-   data value that the segment renders (the specific field depends
-   on the segment type). For now, `value` is set to `nil` — segments
-   do not currently expose which provider field they map to. This
-   can be enhanced later by having segments declare their source
-   field. Dot-field references (`.percent`, `.branch`) are the
-   primary way to access provider data.
-6. Register `text` from `renderedValue` (`""` if nil).
+5. Register `value` from the `value` parameter (nil-coerced same
+   as pointer fields).
+6. Register `text` from the `text` parameter.
 
 If `providerData` is nil or not a struct/pointer-to-struct, return
-a map containing only `value` (nil) and `text`.
+a map containing only `value` and `text`.
 
-Note: field names use the Go exported name lowercased, not JSON tags.
-This keeps the mapping simple and predictable. Provider field names
-are already short and clear (e.g., `Branch`, `Percent`, `Tokens`).
+Note: field names use the Go exported name lowercased, not JSON tags
+or segment tags. Provider field names are already short and clear
+(e.g., `Branch`, `Percent`, `Tokens`).
 
 ## Render Pipeline Changes
 
 Modify `internal/render/render.go` to evaluate `when` during tree
 traversal.
 
-All `when` expressions are evaluated after render. The rendered value
-is passed to `Evaluate` so `value` conditions work. If the expression
-evaluates to false, the rendered output is discarded (returns nil).
+### Data segments
 
-For composite nodes, `when` is evaluated before recursing into
-children. If false, the entire subtree is skipped. `value` is `""`
-for composites.
+For data segments, the pipeline already has:
+- `value` from `segmentValues[node.Type]`
+- `text` from `FormatValue(value, format)`
+- Provider data from `providerData[tagIdx[node.Type].Provider]`
+
+Evaluation happens after format but before style:
+
+```
+value = segmentValues[node.Type]
+if value is nil → collapse
+text = FormatValue(value, format)
+if text is empty → collapse
+if node.When != "" →
+    provider = providerData[tagIdx[node.Type].Provider]
+    env = BuildEnv(provider, value, text)
+    if !condition.Evaluate(env) → collapse
+apply style → output
+```
+
+### Literal segments
+
+Literal segments can use `when` with `text` (their rendered output).
+`value` is nil. Provider data is nil. Only `text`-based conditions
+are meaningful.
+
+### Composite nodes
+
+For composites with `when`, evaluate before recursing into children.
+Provider data is resolved from the explicit `provider` field on the
+node. `value` is nil (coerced to zero), `text` is `""`.
+
+```
+if node.When != "" →
+    provider = providerData[node.Provider]
+    env = BuildEnv(provider, nil, "")
+    if !condition.Evaluate(env) → collapse (skip children)
+recurse children...
+```
 
 ### Interaction with `Enabled` / `EnabledFn`
 
 `when` is an additional gate. Evaluation order:
 1. `Enabled` / `EnabledFn` → if false, skip (existing behavior)
-2. For atomic: `Segment.Render()` → get rendered value
-3. `when` → if false, discard rendered value
-4. For composite: evaluate `when` before recursing children
+2. For composites: evaluate `when` → if false, skip children
+3. For data segments: extract value, format, evaluate `when`
+4. Apply style
 
 ### Compilation caching
 
@@ -210,33 +240,36 @@ Add `github.com/expr-lang/expr` to `go.mod`.
   correct dot-prefixed variables
 - Nil pointer fields → coerced zero values (0, "")
 - Non-nil pointer fields → dereferenced values
-- Nil provider → map with only `value`
-- Non-struct provider → map with only `value`
-- renderedValue non-nil → `value` set
-- renderedValue nil → `value` is `""`
+- Nil provider → map with only `value` and `text`
+- Non-struct provider → map with only `value` and `text`
+- `value` parameter passed through correctly
+- `text` parameter passed through correctly
 
 **Evaluate:**
 - Numeric comparisons: `>=`, `>`, `<`, `<=`, `==`, `!=`
 - String comparisons: `==`, `!=`
 - Boolean combinators: `&&`, `||`
 - Nil-coerced field: `.field >= 50` where field was nil `*int`
-- `value` against rendered output
+- `value` against raw data
+- `text` against formatted output
 - Empty expression (nil Condition) → true
 - Expression returning non-bool → false
 - Runtime error → false
 
 ### Render integration tests (`internal/render/render_test.go`)
 
-- Segment with `when` that passes → renders normally
-- Segment with `when` that fails → returns nil
-- Segment with `value` condition
-- Composite with `when` that passes → children render
+- Data segment with `when` that passes → renders normally
+- Data segment with `when` that fails → collapses
+- Data segment with `value` condition
+- Data segment with `text` condition
+- Composite with `when` and `provider` → evaluates against provider
 - Composite with `when` that fails → subtree skipped
+- Literal segment with `when` on `text`
 - Segment with no `when` → unchanged behavior
 - Segment with invalid `when` → treated as hidden
 
 ## What Doesn't Change
 
 - Existing `Enabled` / `EnabledFn` behavior — `when` is additive
-- Provider resolution, segment rendering, styling — all unchanged
+- Tag index, segment value resolution, formatting — all unchanged
 - All existing presets and configs — `when` is optional
