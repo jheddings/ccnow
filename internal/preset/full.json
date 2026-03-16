@@ -37,6 +37,7 @@
           "children": [
             {
               "segment": "git.insertions",
+              "when": "value > 0",
               "style": {
                 "color": "green",
                 "prefix": "+"
@@ -44,6 +45,7 @@
             },
             {
               "segment": "git.deletions",
+              "when": "value > 0",
               "style": {
                 "color": "red",
                 "prefix": " -"
@@ -102,6 +104,7 @@
         },
         {
           "segment": "context.percent.remaining",
+          "when": "value > 0",
           "style": {
             "color": "white",
             "prefix": " [",
@@ -170,6 +173,7 @@
       "children": [
         {
           "segment": "session.lines-added",
+          "when": "value > 0",
           "style": {
             "color": "green",
             "prefix": "+"
@@ -177,6 +181,7 @@
         },
         {
           "segment": "session.lines-removed",
+          "when": "value > 0",
           "style": {
             "color": "red",
             "prefix": " -"

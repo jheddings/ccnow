@@ -8,20 +8,11 @@ import (
 	"github.com/jheddings/ccglow/internal/types"
 )
 
-// PwdData holds resolved working directory information.
-type PwdData struct {
-	Name  string `segment:"pwd.name"`
-	Path  string `segment:"pwd.path"`
-	Smart string `segment:"pwd.smart"`
-}
-
-func (p *pwdProvider) Fields() any { return &PwdData{} }
-
 type pwdProvider struct{}
 
 func (p *pwdProvider) Name() string { return "pwd" }
 
-func (p *pwdProvider) Resolve(session *types.SessionData) (any, error) {
+func (p *pwdProvider) Resolve(session *types.SessionData) (*types.ProviderResult, error) {
 	cwd := session.CWD
 	name := filepath.Base(cwd)
 	dir := filepath.Dir(cwd)
@@ -29,10 +20,12 @@ func (p *pwdProvider) Resolve(session *types.SessionData) (any, error) {
 		dir += "/"
 	}
 
-	return &PwdData{
-		Name:  name,
-		Path:  dir,
-		Smart: smartPrefix(cwd),
+	return &types.ProviderResult{
+		Values: map[string]any{
+			"pwd.name":  name,
+			"pwd.path":  dir,
+			"pwd.smart": smartPrefix(cwd),
+		},
 	}, nil
 }
 

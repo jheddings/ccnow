@@ -27,18 +27,22 @@
     },
     {
       "segment": "git.insertions",
+      "when": "value > 0",
       "style": { "color": "#50FA7B", "bgcolor": "#3A3A3A", "prefix": " +" }
     },
     {
       "segment": "git.deletions",
+      "when": "value > 0",
       "style": { "color": "#FF6B6B", "bgcolor": "#3A3A3A", "prefix": " -" }
     },
     {
       "segment": "git.modified",
+      "when": "value > 0",
       "style": { "color": "#FFD700", "bgcolor": "#3A3A3A", "prefix": " ~" }
     },
     {
       "segment": "git.untracked",
+      "when": "value > 0",
       "style": { "color": "#8BE9FD", "bgcolor": "#3A3A3A", "prefix": " ?", "suffix": " " }
     },
     {
@@ -117,10 +121,12 @@
     },
     {
       "segment": "session.lines-added",
+      "when": "value > 0",
       "style": { "color": "#50FA7B", "bgcolor": "#3A3A3A", "prefix": " +" }
     },
     {
       "segment": "session.lines-removed",
+      "when": "value > 0",
       "style": { "color": "#FF6B6B", "bgcolor": "#3A3A3A", "prefix": " -", "suffix": " " }
     },
     {

@@ -48,15 +48,14 @@ func TestContextProvider(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*ContextData)
-	if data.Tokens != "600" {
-		t.Errorf("expected 600 tokens, got %s", data.Tokens)
+	if result.Values["context.tokens"] != "600" {
+		t.Errorf("expected 600 tokens, got %s", result.Values["context.tokens"])
 	}
-	if data.Size != "1M" {
-		t.Errorf("expected 1M size, got %s", data.Size)
+	if result.Values["context.size"] != "1M" {
+		t.Errorf("expected 1M size, got %s", result.Values["context.size"])
 	}
-	if *data.Percent != 36 {
-		t.Errorf("expected 36%%, got %d", *data.Percent)
+	if result.Values["context.percent.used"] != 36 {
+		t.Errorf("expected 36%%, got %v", result.Values["context.percent.used"])
 	}
 }
 
@@ -84,12 +83,11 @@ func TestContextProviderWithTotalTokens(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*ContextData)
-	if data.Input != "50K" {
-		t.Errorf("expected Input 50K, got %s", data.Input)
+	if result.Values["context.input"] != "50K" {
+		t.Errorf("expected Input 50K, got %s", result.Values["context.input"])
 	}
-	if data.Output != "8K" {
-		t.Errorf("expected Output 8K, got %s", data.Output)
+	if result.Values["context.output"] != "8K" {
+		t.Errorf("expected Output 8K, got %s", result.Values["context.output"])
 	}
 }
 
@@ -112,12 +110,11 @@ func TestContextProviderInputFallback(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*ContextData)
-	if data.Input != "600" {
-		t.Errorf("expected Input 600, got %s", data.Input)
+	if result.Values["context.input"] != "600" {
+		t.Errorf("expected Input 600, got %s", result.Values["context.input"])
 	}
-	if data.Output != "" {
-		t.Errorf("expected empty Output, got %s", data.Output)
+	if result.Values["context.output"] != "" {
+		t.Errorf("expected empty Output, got %s", result.Values["context.output"])
 	}
 }
 
@@ -138,9 +135,8 @@ func TestContextProviderRemaining(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*ContextData)
-	if data.Remaining == nil || *data.Remaining != 64 {
-		t.Errorf("expected remaining 64, got %v", data.Remaining)
+	if result.Values["context.percent.remaining"] != 64 {
+		t.Errorf("expected remaining 64, got %v", result.Values["context.percent.remaining"])
 	}
 }
 
@@ -153,9 +149,8 @@ func TestContextProviderNoRemaining(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*ContextData)
-	if data.Remaining != nil {
-		t.Errorf("expected nil remaining, got %v", data.Remaining)
+	if result.Values["context.percent.remaining"] != 0 {
+		t.Errorf("expected remaining 0, got %v", result.Values["context.percent.remaining"])
 	}
 }
 
@@ -171,8 +166,7 @@ func TestContextProviderZeroRemaining(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*ContextData)
-	if data.Remaining != nil {
-		t.Errorf("expected nil remaining for zero value with no usage, got %v", data.Remaining)
+	if result.Values["context.percent.remaining"] != 0 {
+		t.Errorf("expected remaining 0 for zero value with no usage, got %v", result.Values["context.percent.remaining"])
 	}
 }

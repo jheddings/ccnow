@@ -2,25 +2,22 @@ package provider
 
 import "github.com/jheddings/ccglow/internal/types"
 
-// ClaudeData holds resolved Claude Code application metadata.
-type ClaudeData struct {
-	Version *string `segment:"claude.version"`
-	Style   *string `segment:"claude.style"`
-}
-
-func (p *claudeProvider) Fields() any { return &ClaudeData{} }
-
 type claudeProvider struct{}
 
 func (p *claudeProvider) Name() string { return "claude" }
 
-func (p *claudeProvider) Resolve(session *types.SessionData) (any, error) {
-	data := &ClaudeData{}
+func (p *claudeProvider) Resolve(session *types.SessionData) (*types.ProviderResult, error) {
+	result := &types.ProviderResult{
+		Values: map[string]any{
+			"claude.version": "",
+			"claude.style":   "",
+		},
+	}
 	if session.Version != "" {
-		data.Version = &session.Version
+		result.Values["claude.version"] = session.Version
 	}
 	if session.OutputStyle != nil && session.OutputStyle.Name != "" {
-		data.Style = &session.OutputStyle.Name
+		result.Values["claude.style"] = session.OutputStyle.Name
 	}
-	return data, nil
+	return result, nil
 }

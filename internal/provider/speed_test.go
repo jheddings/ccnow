@@ -26,15 +26,14 @@ func TestSpeedProvider(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*SpeedData)
-	if data.Input == nil || *data.Input != "2.0K t/s" {
-		t.Errorf("expected Input '2.0K t/s', got %v", data.Input)
+	if result.Values["speed.input"] != "2.0K t/s" {
+		t.Errorf("expected Input '2.0K t/s', got %v", result.Values["speed.input"])
 	}
-	if data.Output == nil || *data.Output != "1.0K t/s" {
-		t.Errorf("expected Output '1.0K t/s', got %v", data.Output)
+	if result.Values["speed.output"] != "1.0K t/s" {
+		t.Errorf("expected Output '1.0K t/s', got %v", result.Values["speed.output"])
 	}
-	if data.Total == nil || *data.Total != "3.0K t/s" {
-		t.Errorf("expected Total '3.0K t/s', got %v", data.Total)
+	if result.Values["speed.total"] != "3.0K t/s" {
+		t.Errorf("expected Total '3.0K t/s', got %v", result.Values["speed.total"])
 	}
 }
 
@@ -54,9 +53,8 @@ func TestSpeedProviderZeroDuration(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*SpeedData)
-	if data.Input != nil {
-		t.Errorf("expected nil Input for zero duration, got %v", *data.Input)
+	if result.Values["speed.input"] != "" {
+		t.Errorf("expected empty Input for zero duration, got %v", result.Values["speed.input"])
 	}
 }
 
@@ -72,9 +70,8 @@ func TestSpeedProviderNilContextWindow(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*SpeedData)
-	if data.Input != nil || data.Output != nil || data.Total != nil {
-		t.Error("expected all nil fields when ContextWindow is nil")
+	if result.Values["speed.input"] != "" || result.Values["speed.output"] != "" || result.Values["speed.total"] != "" {
+		t.Error("expected all empty fields when ContextWindow is nil")
 	}
 }
 
@@ -93,9 +90,8 @@ func TestSpeedProviderNilCost(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*SpeedData)
-	if data.Input != nil || data.Output != nil || data.Total != nil {
-		t.Error("expected all nil fields when Cost is nil")
+	if result.Values["speed.input"] != "" || result.Values["speed.output"] != "" || result.Values["speed.total"] != "" {
+		t.Error("expected all empty fields when Cost is nil")
 	}
 }
 
@@ -115,15 +111,14 @@ func TestSpeedProviderPartialTokens(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*SpeedData)
-	if data.Input == nil || *data.Input != "5.0K t/s" {
-		t.Errorf("expected Input '5.0K t/s', got %v", data.Input)
+	if result.Values["speed.input"] != "5.0K t/s" {
+		t.Errorf("expected Input '5.0K t/s', got %v", result.Values["speed.input"])
 	}
-	if data.Output != nil {
-		t.Errorf("expected nil Output, got %v", *data.Output)
+	if result.Values["speed.output"] != "" {
+		t.Errorf("expected empty Output, got %v", result.Values["speed.output"])
 	}
-	if data.Total != nil {
-		t.Errorf("expected nil Total when output missing, got %v", *data.Total)
+	if result.Values["speed.total"] != "" {
+		t.Errorf("expected empty Total when output missing, got %v", result.Values["speed.total"])
 	}
 }
 

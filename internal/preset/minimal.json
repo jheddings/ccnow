@@ -5,8 +5,7 @@
       "style": { "color": "39" }
     },
     {
-      "provider": "git",
-      "when": ".repo == ''",
+      "when": "git.repo == ''",
       "children": [
         {
           "segment": "pwd.name",
@@ -16,7 +15,7 @@
     },
     {
       "segment": "git.branch",
-      "when": ".branch != '' && .branch != 'main'",
+      "when": "git.branch != '' && git.branch != 'main'",
       "style": { "color": "whiteBright", "bold": true, "prefix": " | " }
     },
     {
@@ -31,7 +30,7 @@
     },
     {
       "segment": "context.percent.used",
-      "when": ".percent >= 50",
+      "when": "context.percent.used >= 50",
       "style": { "color": "yellow", "prefix": " | " }
     }
   ]

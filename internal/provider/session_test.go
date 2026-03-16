@@ -44,18 +44,17 @@ func TestSessionProvider(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*SessionData)
-	if *data.Duration != "1h 30m" {
-		t.Errorf("expected 1h 30m, got %s", *data.Duration)
+	if result.Values["session.duration.total"] != "1h 30m" {
+		t.Errorf("expected 1h 30m, got %s", result.Values["session.duration.total"])
 	}
-	if *data.APIDuration != "8m" {
-		t.Errorf("expected 8m, got %s", *data.APIDuration)
+	if result.Values["session.duration.api"] != "8m" {
+		t.Errorf("expected 8m, got %s", result.Values["session.duration.api"])
 	}
-	if *data.LinesAdded != 100 {
-		t.Errorf("expected 100 lines added, got %d", *data.LinesAdded)
+	if result.Values["session.lines-added"] != 100 {
+		t.Errorf("expected 100 lines added, got %v", result.Values["session.lines-added"])
 	}
-	if *data.LinesRemoved != 50 {
-		t.Errorf("expected 50 lines removed, got %d", *data.LinesRemoved)
+	if result.Values["session.lines-removed"] != 50 {
+		t.Errorf("expected 50 lines removed, got %v", result.Values["session.lines-removed"])
 	}
 }
 
@@ -71,9 +70,8 @@ func TestSessionProviderID(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*SessionData)
-	if data.ID == nil || *data.ID != "abc-123" {
-		t.Errorf("expected abc-123, got %v", data.ID)
+	if result.Values["session.id"] != "abc-123" {
+		t.Errorf("expected abc-123, got %v", result.Values["session.id"])
 	}
 }
 
@@ -86,8 +84,7 @@ func TestSessionProviderNoID(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*SessionData)
-	if data.ID != nil {
-		t.Errorf("expected nil ID, got %v", data.ID)
+	if result.Values["session.id"] != "" {
+		t.Errorf("expected empty ID, got %v", result.Values["session.id"])
 	}
 }

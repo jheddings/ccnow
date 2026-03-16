@@ -25,11 +25,12 @@
           "style": {
             "color": "whiteBright",
             "bold": true,
-            "prefix": " "
+            "prefix": " "
           }
         },
         {
           "segment": "git.insertions",
+          "when": "value > 0",
           "style": {
             "color": "green",
             "prefix": " · +"
@@ -37,6 +38,7 @@
         },
         {
           "segment": "git.deletions",
+          "when": "value > 0",
           "style": {
             "color": "red",
             "prefix": " -"

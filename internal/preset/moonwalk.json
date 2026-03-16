@@ -19,10 +19,12 @@
     },
     {
       "segment": "git.insertions",
+      "when": "value > 0",
       "style": { "color": "#50FA7B", "bgcolor": "#1C3A1C", "prefix": " +" }
     },
     {
       "segment": "git.deletions",
+      "when": "value > 0",
       "style": { "color": "#FF6B6B", "bgcolor": "#1C3A1C", "prefix": " -", "suffix": " " }
     },
     {

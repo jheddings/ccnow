@@ -19,12 +19,11 @@ func TestClaudeProvider(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*ClaudeData)
-	if data.Version == nil || *data.Version != "2.1.75" {
-		t.Errorf("expected version 2.1.75, got %v", data.Version)
+	if result.Values["claude.version"] != "2.1.75" {
+		t.Errorf("expected version 2.1.75, got %v", result.Values["claude.version"])
 	}
-	if data.Style == nil || *data.Style != "concise" {
-		t.Errorf("expected style concise, got %v", data.Style)
+	if result.Values["claude.style"] != "concise" {
+		t.Errorf("expected style concise, got %v", result.Values["claude.style"])
 	}
 }
 
@@ -37,11 +36,10 @@ func TestClaudeProviderEmpty(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*ClaudeData)
-	if data.Version != nil {
-		t.Errorf("expected nil version, got %v", data.Version)
+	if result.Values["claude.version"] != "" {
+		t.Errorf("expected empty version, got %v", result.Values["claude.version"])
 	}
-	if data.Style != nil {
-		t.Errorf("expected nil style, got %v", data.Style)
+	if result.Values["claude.style"] != "" {
+		t.Errorf("expected empty style, got %v", result.Values["claude.style"])
 	}
 }

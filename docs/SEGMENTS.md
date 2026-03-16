@@ -5,8 +5,8 @@ dollar amount. Compose them into any layout you want.
 
 Segments are identified by `provider.field` names. The prefix determines which
 provider fetches the data; the suffix picks the specific value. If a segment has
-nothing to show (no git repo, no cost data yet), it returns empty and silently
-collapses out of the output.
+nothing to show (empty string, no data available), it silently collapses out of
+the output.
 
 ## Directory — `pwd`
 
@@ -36,7 +36,8 @@ navigable path display.
 
 All git segments require a git repository in the current working directory.
 Remote-based segments (`git.owner`, `git.repo`) parse the `origin` remote URL
-and handle both SSH and HTTPS formats.
+and handle both SSH and HTTPS formats. When not in a git repo, all git segments
+return their zero values (`""` for strings, `0` for integers).
 
 ## Context — `context`
 
@@ -127,17 +128,17 @@ value is displayed. Uses Go's `fmt.Sprintf` syntax.
 { "segment": "context.percent.used", "format": "(%d%%)" }
 ```
 
-If no format is specified, the segment uses its default format (declared in
+If no format is specified, the segment uses its default format (declared by
 the provider) or falls back to the raw value as a string.
 
 ### `when`
 
-Any segment can conditionally show or hide based on its data. See
+Any segment can conditionally show or hide based on data. See
 **[Conditional Visibility](WHEN.md)** for the full reference.
 
 ```json
-{ "segment": "git.branch", "when": ".branch != '' && .branch != 'main'" }
-{ "segment": "context.percent.used", "when": ".percent >= 50" }
+{ "segment": "git.branch", "when": "git.branch != '' && git.branch != 'main'" }
+{ "segment": "context.percent.used", "when": "context.percent.used >= 50" }
 { "segment": "git.modified", "when": "value > 0" }
 ```
 
@@ -155,24 +156,16 @@ output. Use composites for sections that should appear or disappear together.
 
 ```json
 {
-  "provider": "git",
-  "when": ".branch != ''",
+  "when": "git.branch != ''",
   "style": { "prefix": " | " },
   "children": [
     { "segment": "git.branch", "style": { "bold": true } },
-    { "segment": "git.insertions", "style": { "color": "green", "prefix": " +" } },
-    { "segment": "git.deletions", "style": { "color": "red", "prefix": " -" } }
+    { "segment": "git.insertions", "when": "value > 0", "style": { "color": "green", "prefix": " +" } },
+    { "segment": "git.deletions", "when": "value > 0", "style": { "color": "red", "prefix": " -" } }
   ]
 }
 ```
 
-Composites support `when` with an explicit `provider` field, allowing you to
-gate entire sections on a condition. See [WHEN.md](WHEN.md) for details.
-
-## Provider Auto-Wiring
-
-You don't need to set `"provider"` explicitly on data segments. The segment
-name maps to its provider automatically via struct tags in the source code.
-
-Each provider fetches its data once and caches it — so ten git segments don't
-mean ten calls to `git status`.
+Composites support `when` expressions that can reference any provider's data,
+allowing you to gate entire sections on any condition. See
+[WHEN.md](WHEN.md) for details.

@@ -6,48 +6,40 @@ import (
 	"github.com/jheddings/ccglow/internal/types"
 )
 
-// SessionData holds resolved session timing and line-change data.
-type SessionData struct {
-	Duration     *string `segment:"session.duration.total"`
-	APIDuration  *string `segment:"session.duration.api"`
-	LinesAdded   *int    `segment:"session.lines-added"`
-	LinesRemoved *int    `segment:"session.lines-removed"`
-	ID           *string `segment:"session.id"`
-}
-
-func (p *sessionProvider) Fields() any { return &SessionData{} }
-
 type sessionProvider struct{}
 
 func (p *sessionProvider) Name() string { return "session" }
 
-func (p *sessionProvider) Resolve(session *types.SessionData) (any, error) {
-	data := &SessionData{}
+func (p *sessionProvider) Resolve(session *types.SessionData) (*types.ProviderResult, error) {
+	result := &types.ProviderResult{
+		Values: map[string]any{
+			"session.duration.total": "",
+			"session.duration.api":   "",
+			"session.lines-added":    0,
+			"session.lines-removed":  0,
+			"session.id":             "",
+		},
+	}
 
 	if session.SessionID != "" {
-		data.ID = &session.SessionID
+		result.Values["session.id"] = session.SessionID
 	}
 
 	if session.Cost == nil {
-		return data, nil
+		return result, nil
 	}
 
-	dur := FormatDuration(session.Cost.TotalDurationMS)
-	data.Duration = &dur
-
-	apiDur := FormatDuration(session.Cost.TotalAPIDurationMS)
-	data.APIDuration = &apiDur
+	result.Values["session.duration.total"] = FormatDuration(session.Cost.TotalDurationMS)
+	result.Values["session.duration.api"] = FormatDuration(session.Cost.TotalAPIDurationMS)
 
 	if session.Cost.TotalLinesAdded > 0 {
-		n := session.Cost.TotalLinesAdded
-		data.LinesAdded = &n
+		result.Values["session.lines-added"] = session.Cost.TotalLinesAdded
 	}
 	if session.Cost.TotalLinesRemoved > 0 {
-		n := session.Cost.TotalLinesRemoved
-		data.LinesRemoved = &n
+		result.Values["session.lines-removed"] = session.Cost.TotalLinesRemoved
 	}
 
-	return data, nil
+	return result, nil
 }
 
 // FormatDuration formats milliseconds into a human-readable duration.

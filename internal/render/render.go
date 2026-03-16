@@ -54,9 +54,9 @@ func renderNode(
 	node *types.SegmentNode,
 	segments *segment.Registry,
 	session *types.SessionData,
-	providerData map[string]any,
 	segmentValues map[string]any,
-	tagIdx TagIndex,
+	defaultFormats map[string]string,
+	conditionEnv map[string]any,
 ) *string {
 	if !isEnabled(node, session) {
 		return nil
@@ -69,11 +69,7 @@ func renderNode(
 			if c == nil {
 				return nil // compilation failed
 			}
-			var pd any
-			if node.Provider != "" {
-				pd = providerData[node.Provider]
-			}
-			env := condition.BuildEnv(pd, nil, "")
+			env := condition.BuildSegmentEnv(conditionEnv, nil, "")
 			if !c.Evaluate(env) {
 				return nil
 			}
@@ -81,7 +77,7 @@ func renderNode(
 
 		var parts []string
 		for i := range node.Children {
-			rendered := renderNode(&node.Children[i], segments, session, providerData, segmentValues, tagIdx)
+			rendered := renderNode(&node.Children[i], segments, session, segmentValues, defaultFormats, conditionEnv)
 			if rendered != nil {
 				parts = append(parts, *rendered)
 			}
@@ -112,16 +108,14 @@ func renderNode(
 
 	// DataSegment: resolve from segment values
 	value, ok := segmentValues[node.Type]
-	if !ok || value == nil {
+	if !ok {
 		return nil
 	}
 
-	// Resolve format: config override > tag default > none
+	// Resolve format: config override > provider default > none
 	format := node.Format
 	if format == "" {
-		if accessor, exists := tagIdx[node.Type]; exists {
-			format = accessor.DefaultFormat
-		}
+		format = defaultFormats[node.Type]
 	}
 
 	text := FormatValue(value, format)
@@ -135,11 +129,7 @@ func renderNode(
 		if c == nil {
 			return nil // compilation failed
 		}
-		var pd any
-		if accessor, exists := tagIdx[node.Type]; exists {
-			pd = providerData[accessor.Provider]
-		}
-		env := condition.BuildEnv(pd, value, text)
+		env := condition.BuildSegmentEnv(conditionEnv, value, text)
 		if !c.Evaluate(env) {
 			return nil
 		}
@@ -155,13 +145,13 @@ func Tree(
 	tree []types.SegmentNode,
 	segments *segment.Registry,
 	session *types.SessionData,
-	providerData map[string]any,
 	segmentValues map[string]any,
-	tagIdx TagIndex,
+	defaultFormats map[string]string,
+	conditionEnv map[string]any,
 ) string {
 	var parts []string
 	for i := range tree {
-		rendered := renderNode(&tree[i], segments, session, providerData, segmentValues, tagIdx)
+		rendered := renderNode(&tree[i], segments, session, segmentValues, defaultFormats, conditionEnv)
 		if rendered != nil {
 			parts = append(parts, *rendered)
 		}
@@ -169,62 +159,37 @@ func Tree(
 	return strings.Join(parts, "")
 }
 
-// CollectProviderNames walks the tree and returns the set of provider
-// names needed for rendering (skipping disabled nodes).
-func CollectProviderNames(tree []types.SegmentNode, tagIdx TagIndex) map[string]bool {
-	names := make(map[string]bool)
-	collectNames(tree, names, tagIdx)
-	return names
-}
-
-func collectNames(nodes []types.SegmentNode, names map[string]bool, idx TagIndex) {
-	for _, node := range nodes {
-		if node.Enabled != nil && !*node.Enabled {
-			continue
-		}
-		if accessor, ok := idx[node.Type]; ok {
-			names[accessor.Provider] = true
-		}
-		if node.Provider != "" {
-			names[node.Provider] = true
-		}
-		if len(node.Children) > 0 {
-			collectNames(node.Children, names, idx)
-		}
-	}
-}
-
-// ResolveProviders resolves all named providers concurrently and returns
-// a map of provider name → resolved data.
-func ResolveProviders(
-	names map[string]bool,
+// ResolveAll resolves all providers and returns merged segment values
+// and default formats.
+func ResolveAll(
 	providers map[string]types.DataProvider,
 	session *types.SessionData,
-) map[string]any {
-	results := make(map[string]any)
+) (segmentValues map[string]any, defaultFormats map[string]string) {
+	segmentValues = make(map[string]any)
+	defaultFormats = make(map[string]string)
 	var mu sync.Mutex
 	var wg sync.WaitGroup
 
-	for name := range names {
-		p, ok := providers[name]
-		if !ok {
-			log.Warn().Str("provider", name).Msg("provider not registered")
-			continue
-		}
+	for _, p := range providers {
 		wg.Add(1)
 		go func(prov types.DataProvider) {
 			defer wg.Done()
-			data, err := prov.Resolve(session)
+			result, err := prov.Resolve(session)
 			if err != nil {
 				log.Warn().Err(err).Str("provider", prov.Name()).Msg("provider resolve failed")
 				return
 			}
 			mu.Lock()
-			results[prov.Name()] = data
+			for k, v := range result.Values {
+				segmentValues[k] = v
+			}
+			for k, v := range result.Formats {
+				defaultFormats[k] = v
+			}
 			mu.Unlock()
 		}(p)
 	}
 
 	wg.Wait()
-	return results
+	return segmentValues, defaultFormats
 }

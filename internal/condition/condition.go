@@ -1,16 +1,11 @@
 package condition
 
 import (
-	"reflect"
-	"regexp"
 	"strings"
 
 	"github.com/expr-lang/expr"
 	"github.com/expr-lang/expr/vm"
 )
-
-// dotFieldRe matches dot-prefixed field references like .name, .count
-var dotFieldRe = regexp.MustCompile(`\.([a-zA-Z_][a-zA-Z0-9_]*)`)
 
 // Condition is a compiled when expression.
 type Condition struct {
@@ -24,10 +19,7 @@ func Compile(expression string) (*Condition, error) {
 		return nil, nil
 	}
 
-	// Rewrite .field references to __field for the expr engine
-	rewritten := dotFieldRe.ReplaceAllString(expression, "__$1")
-
-	program, err := expr.Compile(rewritten, expr.AllowUndefinedVariables())
+	program, err := expr.Compile(expression, expr.AllowUndefinedVariables())
 	if err != nil {
 		return nil, err
 	}
@@ -43,17 +35,7 @@ func (c *Condition) Evaluate(env map[string]any) bool {
 		return true
 	}
 
-	// Rewrite .field keys to __field to match compiled expression
-	translated := make(map[string]any, len(env))
-	for k, v := range env {
-		if strings.HasPrefix(k, ".") {
-			translated["__"+k[1:]] = v
-		} else {
-			translated[k] = v
-		}
-	}
-
-	result, err := expr.Run(c.program, translated)
+	result, err := expr.Run(c.program, env)
 	if err != nil {
 		return false
 	}
@@ -62,62 +44,52 @@ func (c *Condition) Evaluate(env map[string]any) bool {
 	return ok && b
 }
 
-// BuildEnv builds the variable environment for expression evaluation.
-func BuildEnv(providerData any, value any, text string) map[string]any {
+// BuildNestedEnv converts a flat segment values map into nested maps
+// for expr-lang member access. "git.repo" becomes env["git"]["repo"].
+func BuildNestedEnv(segmentValues map[string]any) map[string]any {
 	env := make(map[string]any)
 
-	if providerData != nil {
-		v := reflect.ValueOf(providerData)
-		if v.Kind() == reflect.Ptr {
-			if !v.IsNil() {
-				v = v.Elem()
-			} else {
-				v = reflect.Value{}
-			}
+	for key, value := range segmentValues {
+		parts := strings.SplitN(key, ".", 2)
+		if len(parts) != 2 {
+			env[key] = value
+			continue
 		}
 
-		if v.IsValid() && v.Kind() == reflect.Struct {
-			t := v.Type()
-			for i := 0; i < t.NumField(); i++ {
-				field := t.Field(i)
-				if !field.IsExported() {
-					continue
-				}
+		ns := parts[0]
+		field := parts[1]
 
-				key := "." + strings.ToLower(field.Name)
-				fv := v.Field(i)
+		sub, ok := env[ns].(map[string]any)
+		if !ok {
+			sub = make(map[string]any)
+			env[ns] = sub
+		}
 
-				if fv.Kind() == reflect.Ptr {
-					if fv.IsNil() {
-						env[key] = coerceNilPointer(field.Type)
-						continue
-					}
-					fv = fv.Elem()
-				}
-
-				env[key] = fv.Interface()
+		// Handle dotted field names like "percent.used" -> nested further
+		fieldParts := strings.SplitN(field, ".", 2)
+		if len(fieldParts) == 2 {
+			inner, ok := sub[fieldParts[0]].(map[string]any)
+			if !ok {
+				inner = make(map[string]any)
+				sub[fieldParts[0]] = inner
 			}
+			inner[fieldParts[1]] = value
+		} else {
+			sub[field] = value
 		}
 	}
-
-	env["value"] = value
-	env["text"] = text
 
 	return env
 }
 
-func coerceNilPointer(t reflect.Type) any {
-	elem := t.Elem()
-	switch elem.Kind() {
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		return 0
-	case reflect.Float32, reflect.Float64:
-		return 0.0
-	case reflect.String:
-		return ""
-	case reflect.Bool:
-		return false
-	default:
-		return nil
+// BuildSegmentEnv creates the evaluation environment for a single segment's
+// when expression. It shallow-copies the nested env and adds value/text keys.
+func BuildSegmentEnv(nestedEnv map[string]any, value any, text string) map[string]any {
+	env := make(map[string]any, len(nestedEnv)+2)
+	for k, v := range nestedEnv {
+		env[k] = v
 	}
+	env["value"] = value
+	env["text"] = text
+	return env
 }

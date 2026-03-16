@@ -18,9 +18,8 @@ func TestModelProvider(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*ModelData)
-	if *data.Name != "Opus 4.6" {
-		t.Errorf("expected Opus 4.6, got %s", *data.Name)
+	if result.Values["model.name"] != "Opus 4.6" {
+		t.Errorf("expected Opus 4.6, got %s", result.Values["model.name"])
 	}
 }
 
@@ -36,9 +35,8 @@ func TestModelProviderID(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*ModelData)
-	if data.ID == nil || *data.ID != "claude-opus-4-6[1m]" {
-		t.Errorf("expected claude-opus-4-6[1m], got %v", data.ID)
+	if result.Values["model.id"] != "claude-opus-4-6[1m]" {
+		t.Errorf("expected claude-opus-4-6[1m], got %v", result.Values["model.id"])
 	}
 }
 
@@ -51,11 +49,10 @@ func TestModelProviderNoModel(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*ModelData)
-	if data.ID != nil {
-		t.Errorf("expected nil ID, got %v", data.ID)
+	if result.Values["model.id"] != "" {
+		t.Errorf("expected empty ID, got %v", result.Values["model.id"])
 	}
-	if data.Name != nil {
-		t.Errorf("expected nil Name, got %v", data.Name)
+	if result.Values["model.name"] != "" {
+		t.Errorf("expected empty Name, got %v", result.Values["model.name"])
 	}
 }

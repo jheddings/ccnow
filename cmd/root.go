@@ -6,6 +6,7 @@ import (
 	"os"
 	"runtime/debug"
 
+	"github.com/jheddings/ccglow/internal/condition"
 	"github.com/jheddings/ccglow/internal/config"
 	"github.com/jheddings/ccglow/internal/preset"
 	"github.com/jheddings/ccglow/internal/provider"
@@ -126,22 +127,15 @@ func run(presetName, configPath, format, stdin string) string {
 	providers := provider.NewRegistry()
 	provider.RegisterBuiltin(providers)
 
-	tagIdx, err := render.BuildTagIndex(providers.All())
-	if err != nil {
-		log.Error().Err(err).Msg("tag index error")
-		return ""
-	}
-
 	tree := resolveTree(presetName, configPath)
 	log.Debug().Int("count", len(tree)).Msg("tree resolved")
 
-	providerNames := render.CollectProviderNames(tree, tagIdx)
-	log.Debug().Int("count", len(providerNames)).Msg("providers collected")
+	segmentValues, defaultFormats := render.ResolveAll(providers.All(), sess)
+	log.Debug().Int("segments", len(segmentValues)).Msg("providers resolved")
 
-	providerData := render.ResolveProviders(providerNames, providers.All(), sess)
-	segmentValues := render.ResolveSegmentValues(tagIdx, providerData)
+	conditionEnv := condition.BuildNestedEnv(segmentValues)
 
-	output := render.Tree(tree, segments, sess, providerData, segmentValues, tagIdx)
+	output := render.Tree(tree, segments, sess, segmentValues, defaultFormats, conditionEnv)
 	log.Debug().Msg("render complete")
 
 	return output

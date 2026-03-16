@@ -2,25 +2,22 @@ package provider
 
 import "github.com/jheddings/ccglow/internal/types"
 
-// ModelData holds resolved model information.
-type ModelData struct {
-	Name *string `segment:"model.name"`
-	ID   *string `segment:"model.id"`
-}
-
-func (p *modelProvider) Fields() any { return &ModelData{} }
-
 type modelProvider struct{}
 
 func (p *modelProvider) Name() string { return "model" }
 
-func (p *modelProvider) Resolve(session *types.SessionData) (any, error) {
-	data := &ModelData{}
+func (p *modelProvider) Resolve(session *types.SessionData) (*types.ProviderResult, error) {
+	result := &types.ProviderResult{
+		Values: map[string]any{
+			"model.name": "",
+			"model.id":   "",
+		},
+	}
 	if session.Model != nil && session.Model.DisplayName != "" {
-		data.Name = &session.Model.DisplayName
+		result.Values["model.name"] = session.Model.DisplayName
 	}
 	if session.Model != nil && session.Model.ID != "" {
-		data.ID = &session.Model.ID
+		result.Values["model.id"] = session.Model.ID
 	}
-	return data, nil
+	return result, nil
 }

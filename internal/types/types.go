@@ -63,7 +63,7 @@ type StyleAttrs struct {
 // atomic nodes have a Type that maps to a Segment implementation.
 type SegmentNode struct {
 	Type     string         `json:"segment,omitempty"`
-	Provider string         `json:"provider,omitempty"`
+	Provider string         `json:"provider,omitempty"` // kept for backward compat, ignored internally
 	Format   string         `json:"format,omitempty"`
 	When     string         `json:"when,omitempty"`
 	Enabled  *bool          `json:"enabled,omitempty"`
@@ -87,14 +87,14 @@ type Segment interface {
 	Render(ctx *SegmentContext) *string
 }
 
-// DataProvider lazily fetches external data (git, pwd, etc).
-type DataProvider interface {
-	Name() string
-	Resolve(session *SessionData) (any, error)
+// ProviderResult holds the values and optional default formats returned by a provider.
+type ProviderResult struct {
+	Values  map[string]any    // segment name -> raw value
+	Formats map[string]string // segment name -> default format (optional)
 }
 
-// FieldProvider extends DataProvider with struct tag discovery.
-type FieldProvider interface {
-	DataProvider
-	Fields() any // returns a zero-value struct pointer, e.g., &GitData{}
+// DataProvider fetches external data and returns named segment values.
+type DataProvider interface {
+	Name() string
+	Resolve(session *SessionData) (*ProviderResult, error)
 }
