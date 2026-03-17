@@ -5,7 +5,7 @@
       "children": [
         {
           "expr": "pwd.smart",
-          "style": { "color": "31" }
+          "style": { "color": "31", "prefix": "\uf07b " }
         },
         {
           "expr": "pwd.name",
@@ -16,6 +16,10 @@
     {
       "when": "git.repo != ''",
       "children": [
+        {
+          "value": "\uf09b ",
+          "style": { "color": "240" }
+        },
         {
           "expr": "git.owner",
           "style": { "color": "240", "suffix": "/" }
@@ -29,32 +33,32 @@
     {
       "expr": "git.branch",
       "when": "git.branch != '' && git.branch != 'main'",
-      "style": { "color": "whiteBright", "bold": true, "prefix": "  @" }
+      "style": { "color": "whiteBright", "bold": true, "prefix": "  \ue0a0 " }
     },
     {
       "expr": "git.modified",
       "when": "value > 0",
-      "style": { "color": "yellow", "prefix": "  *" }
+      "style": { "color": "yellow", "prefix": "  \uf044 " }
     },
     {
       "expr": "git.untracked",
       "when": "value > 0",
-      "style": { "color": "cyan", "prefix": "  ?" }
+      "style": { "color": "cyan", "prefix": "  \uf128 " }
     },
     {
       "expr": "context.percent.used",
       "when": "value >= 50",
-      "style": { "color": "yellow", "prefix": "  " }
+      "style": { "color": "yellow", "prefix": "  \uf0e4 " }
     },
     {
       "expr": "cost.total",
       "when": "cost.total > 5",
-      "style": { "color": "red", "prefix": "  " }
+      "style": { "color": "red", "prefix": "  \uf155 " }
     },
     {
       "expr": "session.duration.total",
       "when": "session.duration.total_min > 60",
-      "style": { "color": "magenta", "prefix": "  " }
+      "style": { "color": "magenta", "prefix": "  \uf017 " }
     }
   ]
 }

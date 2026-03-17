@@ -29,6 +29,16 @@ func TestGet_Full(t *testing.T) {
 	}
 }
 
+func TestGet_Glow(t *testing.T) {
+	nodes := Get("glow")
+	if nodes == nil {
+		t.Fatal("expected glow preset, got nil")
+	}
+	if len(nodes) == 0 {
+		t.Fatal("expected non-empty segment tree")
+	}
+}
+
 func TestGet_Unknown(t *testing.T) {
 	nodes := Get("nonexistent")
 	if nodes != nil {
