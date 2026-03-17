@@ -2,35 +2,55 @@ package cmd
 
 import (
 	"encoding/json"
+	"os"
+	"path/filepath"
 	"testing"
 )
 
-func TestRun_Dump(t *testing.T) {
+func TestRun_ReturnsOutputAndEnv(t *testing.T) {
 	stdin := `{"cwd": "/tmp"}`
 
-	output := run("default", "", "plain", stdin, true)
+	output, env := run("default", "", "plain", stdin)
 
 	if output == "" {
-		t.Fatal("expected JSON output from dump, got empty string")
+		t.Fatal("expected rendered output, got empty string")
 	}
 
-	var env map[string]any
-	if err := json.Unmarshal([]byte(output), &env); err != nil {
-		t.Fatalf("expected valid JSON from dump, got error: %v\noutput: %s", err, output)
+	if env == nil {
+		t.Fatal("expected env map, got nil")
+	}
+
+	data, err := json.Marshal(env)
+	if err != nil {
+		t.Fatalf("expected env to be JSON-serializable, got error: %v", err)
+	}
+	if len(data) == 0 {
+		t.Fatal("expected non-empty JSON from env")
 	}
 }
 
-func TestRun_NoDump(t *testing.T) {
+func TestDump_WritesEnvToFile(t *testing.T) {
 	stdin := `{"cwd": "/tmp"}`
+	dumpPath := filepath.Join(t.TempDir(), "env.json")
 
-	output := run("default", "", "plain", stdin, false)
+	_, env := run("default", "", "plain", stdin)
 
-	// Without dump, output should be rendered text (not JSON).
-	// Just verify it doesn't parse as a JSON object with provider keys.
-	var env map[string]any
-	if err := json.Unmarshal([]byte(output), &env); err == nil {
-		// If it happens to be valid JSON, that's fine, but it shouldn't
-		// be the same as the dump output (rendered text is unlikely valid JSON).
-		t.Log("output happened to be valid JSON, skipping further checks")
+	data, err := json.MarshalIndent(env, "", "  ")
+	if err != nil {
+		t.Fatalf("failed to marshal env: %v", err)
+	}
+
+	if err := os.WriteFile(dumpPath, data, 0644); err != nil {
+		t.Fatalf("failed to write dump file: %v", err)
+	}
+
+	contents, err := os.ReadFile(dumpPath)
+	if err != nil {
+		t.Fatalf("failed to read dump file: %v", err)
+	}
+
+	var parsed map[string]any
+	if err := json.Unmarshal(contents, &parsed); err != nil {
+		t.Fatalf("dump file is not valid JSON: %v", err)
 	}
 }

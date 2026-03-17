@@ -114,6 +114,7 @@ Flags:
   --config <path>     Load JSON config file
   --format <type>     Output format: ansi (default), plain
   --tee <path>        Write raw stdin JSON to file before processing
+  --dump <path>       Write resolved provider env as JSON to file
   --help              Show help
   --version           Show version
 ```
