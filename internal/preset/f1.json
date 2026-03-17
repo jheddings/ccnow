@@ -10,43 +10,47 @@
     },
     {
       "value": "\ue0b0",
-      "style": { "color": "#DC0000", "bgcolor": "#3A3A3A" }
+      "style": { "color": "#DC0000", "bgcolor": "#1A1A2E" }
     },
     {
       "expr": "git.owner",
-      "style": { "color": "#AAAAAA", "bgcolor": "#3A3A3A", "prefix": " \uf09b " }
+      "style": { "color": "#8888AA", "bgcolor": "#1A1A2E", "prefix": " \uf09b " }
     },
     {
       "expr": "git.repo",
-      "style": { "color": "white", "bgcolor": "#3A3A3A", "bold": true, "prefix": "/" }
+      "style": { "color": "white", "bgcolor": "#1A1A2E", "bold": true, "prefix": "/" }
     },
     {
       "expr": "git.branch",
-      "style": { "color": "white", "bgcolor": "#3A3A3A", "bold": true, "prefix": " \ue0a0 " }
+      "style": { "color": "#E0E0FF", "bgcolor": "#1A1A2E", "bold": true, "prefix": " \ue0a0 " }
+    },
+    {
+      "value": "\ue0b0",
+      "style": { "color": "#1A1A2E", "bgcolor": "#0D47A1" }
     },
     {
       "expr": "git.insertions",
       "when": "value > 0",
-      "style": { "color": "#50FA7B", "bgcolor": "#3A3A3A", "prefix": " +" }
+      "style": { "color": "#50FA7B", "bgcolor": "#0D47A1", "prefix": " +" }
     },
     {
       "expr": "git.deletions",
       "when": "value > 0",
-      "style": { "color": "#FF6B6B", "bgcolor": "#3A3A3A", "prefix": " -" }
+      "style": { "color": "#FF6B6B", "bgcolor": "#0D47A1", "prefix": " -" }
     },
     {
       "expr": "git.modified",
       "when": "value > 0",
-      "style": { "color": "#FFD700", "bgcolor": "#3A3A3A", "prefix": " ~" }
+      "style": { "color": "#FFD700", "bgcolor": "#0D47A1", "prefix": " ~" }
     },
     {
       "expr": "git.untracked",
       "when": "value > 0",
-      "style": { "color": "#8BE9FD", "bgcolor": "#3A3A3A", "prefix": " ?", "suffix": " " }
+      "style": { "color": "#8BE9FD", "bgcolor": "#0D47A1", "prefix": " ?", "suffix": " " }
     },
     {
       "value": "\ue0b0",
-      "style": { "color": "#3A3A3A" }
+      "style": { "color": "#0D47A1" }
     },
     {
       "value": "\n"
@@ -63,27 +67,27 @@
     },
     {
       "value": "\ue0b0",
-      "style": { "color": "#003DA5", "bgcolor": "#2D2D2D" }
+      "style": { "color": "#003DA5", "bgcolor": "#2E1A47" }
     },
     {
       "expr": "context.tokens",
-      "style": { "color": "white", "bgcolor": "#2D2D2D", "bold": true, "prefix": " \uf0e4 " }
+      "style": { "color": "white", "bgcolor": "#2E1A47", "bold": true, "prefix": " \uf0e4 " }
     },
     {
       "expr": "context.size",
-      "style": { "color": "white", "bgcolor": "#2D2D2D", "prefix": "/" }
+      "style": { "color": "#B39DDB", "bgcolor": "#2E1A47", "prefix": "/" }
     },
     {
       "expr": "context.percent.used",
-      "style": { "color": "white", "bgcolor": "#2D2D2D", "prefix": " (", "suffix": ")" }
+      "style": { "color": "white", "bgcolor": "#2E1A47", "prefix": " (", "suffix": ")" }
     },
     {
       "expr": "speed.output",
-      "style": { "color": "#50FA7B", "bgcolor": "#2D2D2D", "prefix": " \uf0e7 ", "suffix": " " }
+      "style": { "color": "#50FA7B", "bgcolor": "#2E1A47", "bold": true, "prefix": " \uf0e7 ", "suffix": " " }
     },
     {
       "value": "\ue0b0",
-      "style": { "color": "#2D2D2D", "bgcolor": "#006633" }
+      "style": { "color": "#2E1A47", "bgcolor": "#006633" }
     },
     {
       "expr": "cost.usd",
@@ -111,21 +115,21 @@
     },
     {
       "value": "\ue0b0",
-      "style": { "color": "#FF8000", "bgcolor": "#3A3A3A" }
+      "style": { "color": "#FF8000", "bgcolor": "#004D40" }
     },
     {
       "expr": "session.lines-added",
       "when": "value > 0",
-      "style": { "color": "#50FA7B", "bgcolor": "#3A3A3A", "prefix": " +" }
+      "style": { "color": "#50FA7B", "bgcolor": "#004D40", "prefix": " +" }
     },
     {
       "expr": "session.lines-removed",
       "when": "value > 0",
-      "style": { "color": "#FF6B6B", "bgcolor": "#3A3A3A", "prefix": " -", "suffix": " " }
+      "style": { "color": "#FF6B6B", "bgcolor": "#004D40", "prefix": " -", "suffix": " " }
     },
     {
       "value": "\ue0b0",
-      "style": { "color": "#3A3A3A" }
+      "style": { "color": "#004D40" }
     },
     {
       "value": "\n"
@@ -134,66 +138,68 @@
       "expr": "system.load.avg1",
       "style": {
         "color": "white",
-        "bgcolor": "#444444",
-        "prefix": " \u26a1 "
+        "bgcolor": "#9B0000",
+        "bold": true,
+        "prefix": " \u26a1 ",
+        "suffix": " "
       }
     },
     {
       "value": "\ue0b0",
-      "style": { "color": "#444444", "bgcolor": "#333333" }
+      "style": { "color": "#9B0000", "bgcolor": "#00594C" }
     },
     {
       "expr": "system.mem.used",
-      "style": { "color": "#8BE9FD", "bgcolor": "#333333", "prefix": " \uf233 " }
+      "style": { "color": "white", "bgcolor": "#00594C", "bold": true, "prefix": " \uf233 " }
     },
     {
       "expr": "system.mem.total",
-      "style": { "color": "#AAAAAA", "bgcolor": "#333333", "prefix": "/" }
+      "style": { "color": "#7FDBCA", "bgcolor": "#00594C", "prefix": "/" }
     },
     {
       "expr": "system.mem.percent",
-      "style": { "color": "white", "bgcolor": "#333333", "prefix": " (", "suffix": ")" }
+      "style": { "color": "white", "bgcolor": "#00594C", "prefix": " (", "suffix": ") " }
     },
     {
       "value": "\ue0b0",
-      "style": { "color": "#333333", "bgcolor": "#2A2A2A" }
+      "style": { "color": "#00594C", "bgcolor": "#1E3A5F" }
     },
     {
       "expr": "system.disk.used",
-      "style": { "color": "#FFD700", "bgcolor": "#2A2A2A", "prefix": " \uf0a0 " }
+      "style": { "color": "white", "bgcolor": "#1E3A5F", "bold": true, "prefix": " \uf0a0 " }
     },
     {
       "expr": "system.disk.total",
-      "style": { "color": "#AAAAAA", "bgcolor": "#2A2A2A", "prefix": "/" }
+      "style": { "color": "#7EB8E0", "bgcolor": "#1E3A5F", "prefix": "/" }
     },
     {
       "expr": "system.disk.percent",
-      "style": { "color": "white", "bgcolor": "#2A2A2A", "prefix": " (", "suffix": ")" }
+      "style": { "color": "white", "bgcolor": "#1E3A5F", "prefix": " (", "suffix": ") " }
     },
     {
       "value": "\ue0b0",
-      "style": { "color": "#2A2A2A", "bgcolor": "#222222" }
+      "style": { "color": "#1E3A5F", "bgcolor": "#5C2D91" }
     },
     {
       "when": "system.battery.percent > 0",
       "children": [
         {
           "expr": "system.battery.percent",
-          "style": { "color": "#50FA7B", "bgcolor": "#222222", "prefix": " \uf240 " }
+          "style": { "color": "#50FA7B", "bgcolor": "#5C2D91", "bold": true, "prefix": " \uf240 " }
         },
         {
           "expr": "system.battery.state",
-          "style": { "color": "#AAAAAA", "bgcolor": "#222222", "prefix": " " }
+          "style": { "color": "#C9A0DC", "bgcolor": "#5C2D91", "prefix": " " }
         }
       ]
     },
     {
       "expr": "system.uptime",
-      "style": { "color": "#AAAAAA", "bgcolor": "#222222", "prefix": " \uf017 ", "suffix": " " }
+      "style": { "color": "white", "bgcolor": "#5C2D91", "prefix": " \uf017 ", "suffix": " " }
     },
     {
       "value": "\ue0b0",
-      "style": { "color": "#222222" }
+      "style": { "color": "#5C2D91" }
     }
   ]
 }
