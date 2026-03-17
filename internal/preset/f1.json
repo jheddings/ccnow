@@ -126,6 +126,74 @@
     {
       "value": "\ue0b0",
       "style": { "color": "#3A3A3A" }
+    },
+    {
+      "value": "\n"
+    },
+    {
+      "expr": "system.load.avg1",
+      "style": {
+        "color": "white",
+        "bgcolor": "#444444",
+        "prefix": " \u26a1 "
+      }
+    },
+    {
+      "value": "\ue0b0",
+      "style": { "color": "#444444", "bgcolor": "#333333" }
+    },
+    {
+      "expr": "system.mem.used",
+      "style": { "color": "#8BE9FD", "bgcolor": "#333333", "prefix": " \uf233 " }
+    },
+    {
+      "expr": "system.mem.total",
+      "style": { "color": "#AAAAAA", "bgcolor": "#333333", "prefix": "/" }
+    },
+    {
+      "expr": "system.mem.percent",
+      "style": { "color": "white", "bgcolor": "#333333", "prefix": " (", "suffix": ")" }
+    },
+    {
+      "value": "\ue0b0",
+      "style": { "color": "#333333", "bgcolor": "#2A2A2A" }
+    },
+    {
+      "expr": "system.disk.used",
+      "style": { "color": "#FFD700", "bgcolor": "#2A2A2A", "prefix": " \uf0a0 " }
+    },
+    {
+      "expr": "system.disk.total",
+      "style": { "color": "#AAAAAA", "bgcolor": "#2A2A2A", "prefix": "/" }
+    },
+    {
+      "expr": "system.disk.percent",
+      "style": { "color": "white", "bgcolor": "#2A2A2A", "prefix": " (", "suffix": ")" }
+    },
+    {
+      "value": "\ue0b0",
+      "style": { "color": "#2A2A2A", "bgcolor": "#222222" }
+    },
+    {
+      "when": "system.battery.percent > 0",
+      "children": [
+        {
+          "expr": "system.battery.percent",
+          "style": { "color": "#50FA7B", "bgcolor": "#222222", "prefix": " \uf240 " }
+        },
+        {
+          "expr": "system.battery.state",
+          "style": { "color": "#AAAAAA", "bgcolor": "#222222", "prefix": " " }
+        }
+      ]
+    },
+    {
+      "expr": "system.uptime",
+      "style": { "color": "#AAAAAA", "bgcolor": "#222222", "prefix": " \uf017 ", "suffix": " " }
+    },
+    {
+      "value": "\ue0b0",
+      "style": { "color": "#222222" }
     }
   ]
 }
