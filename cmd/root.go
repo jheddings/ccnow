@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -23,6 +24,7 @@ var (
 	configPath string
 	format     string
 	tee        string
+	dump       bool
 	logPath    string
 	verbose    bool
 )
@@ -62,7 +64,7 @@ var rootCmd = &cobra.Command{
 			}
 		}
 
-		output := run(presetName, configPath, format, string(stdinBytes))
+		output := run(presetName, configPath, format, string(stdinBytes), dump)
 		if output != "" {
 			fmt.Print(output)
 		}
@@ -76,6 +78,7 @@ func init() {
 	rootCmd.Flags().StringVar(&configPath, "config", "", "Load JSON config file")
 	rootCmd.Flags().StringVar(&format, "format", "ansi", "Output format: ansi, plain")
 	rootCmd.Flags().StringVar(&tee, "tee", "", "Write raw stdin JSON to file before processing")
+	rootCmd.Flags().BoolVar(&dump, "dump", false, "Dump resolved provider env as JSON and exit")
 
 	rootCmd.PersistentFlags().StringVar(&logPath, "log", "", "Write logs to file (no logging when omitted)")
 	rootCmd.PersistentFlags().BoolVar(&verbose, "verbose", false, "Set log level to debug")
@@ -104,7 +107,7 @@ func Version() string {
 	return "dev"
 }
 
-func run(presetName, configPath, format, stdin string) string {
+func run(presetName, configPath, format, stdin string, dump bool) string {
 	sess := session.Parse(stdin)
 	if sess == nil {
 		log.Warn().Msg("failed to parse session")
@@ -122,11 +125,20 @@ func run(presetName, configPath, format, stdin string) string {
 	providers := provider.NewRegistry()
 	provider.RegisterBuiltin(providers)
 
-	tree := resolveTree(presetName, configPath)
-	log.Debug().Int("count", len(tree)).Msg("tree resolved")
-
 	env, defaultFormats := render.BuildEnv(providers.All(), sess)
 	log.Debug().Int("providers", len(env)).Msg("env built")
+
+	if dump {
+		data, err := json.MarshalIndent(env, "", "  ")
+		if err != nil {
+			log.Error().Err(err).Msg("failed to marshal env")
+			return ""
+		}
+		return string(data)
+	}
+
+	tree := resolveTree(presetName, configPath)
+	log.Debug().Int("count", len(tree)).Msg("tree resolved")
 
 	output := render.Tree(tree, sess, env, defaultFormats)
 	log.Debug().Msg("render complete")
