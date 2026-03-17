@@ -80,6 +80,33 @@ func TestParse_WithFormat(t *testing.T) {
 	}
 }
 
+func TestParse_CommandNode(t *testing.T) {
+	input := `{"segments": [{"command": "echo hello", "style": {"color": "cyan"}}]}`
+
+	nodes, err := Parse([]byte(input))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(nodes) != 1 {
+		t.Fatalf("expected 1 node, got %d", len(nodes))
+	}
+	if nodes[0].Command != "echo hello" {
+		t.Errorf("expected command 'echo hello', got %q", nodes[0].Command)
+	}
+}
+
+func TestParse_CommandNodeNotFiltered(t *testing.T) {
+	input := `{"segments": [{"command": "cat VERSION"}, {"expr": "pwd.name"}]}`
+
+	nodes, err := Parse([]byte(input))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(nodes) != 2 {
+		t.Fatalf("expected 2 nodes (command not filtered), got %d", len(nodes))
+	}
+}
+
 func TestParse_SkipsEmptyNodes(t *testing.T) {
 	input := `{"segments": [{"style": {"color": "red"}}, {"expr": "pwd.name"}]}`
 

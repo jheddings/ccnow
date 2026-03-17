@@ -40,18 +40,22 @@ not just the one that owns the current node.
 ### `value` — Raw data value
 
 The raw value from the expression this node evaluates. The type matches the
-provider field — `int` for counts, `string` for text, etc.
+provider field — `int` for counts, `string` for text, etc. For `command` nodes,
+`value` is the raw stdout string (after whitespace trimming).
 
 ```json
 { "expr": "git.modified", "when": "value > 0" }
+{ "command": "cat VERSION", "when": "value != ''" }
 ```
 
 ### `text` — Formatted display text
 
 The formatted but unstyled text the node would display. Always a string.
+For `command` nodes, `text` is the formatted output (after applying `format`).
 
 ```json
 { "expr": "cost.usd", "when": "text != ''" }
+{ "command": "echo 42", "format": "v%s", "when": "text != ''" }
 ```
 
 ## Operators

@@ -431,6 +431,125 @@ func TestBuildEnv_Metrics(t *testing.T) {
 	}
 }
 
+// --- Command node tests ---
+
+func TestTree_CommandNode(t *testing.T) {
+	style.SetColorLevel(0)
+	defer style.SetColorLevel(1)
+
+	sess := &types.SessionData{CWD: "/tmp"}
+	tree := []types.SegmentNode{
+		{Command: "echo hello"},
+	}
+
+	result := Tree(tree, sess, map[string]any{}, map[string]string{})
+	if result != "hello" {
+		t.Errorf("expected 'hello', got %q", result)
+	}
+}
+
+func TestTree_CommandEmptyCollapses(t *testing.T) {
+	sess := &types.SessionData{CWD: "/tmp"}
+	tree := []types.SegmentNode{
+		{Command: "printf ''"},
+	}
+
+	result := Tree(tree, sess, map[string]any{}, map[string]string{})
+	if result != "" {
+		t.Errorf("expected empty (collapsed), got %q", result)
+	}
+}
+
+func TestTree_CommandNonZeroCollapses(t *testing.T) {
+	sess := &types.SessionData{CWD: "/tmp"}
+	tree := []types.SegmentNode{
+		{Command: "exit 1"},
+	}
+
+	result := Tree(tree, sess, map[string]any{}, map[string]string{})
+	if result != "" {
+		t.Errorf("expected empty for non-zero exit, got %q", result)
+	}
+}
+
+func TestTree_CommandWithFormat(t *testing.T) {
+	style.SetColorLevel(0)
+	defer style.SetColorLevel(1)
+
+	sess := &types.SessionData{CWD: "/tmp"}
+	tree := []types.SegmentNode{
+		{Command: "echo 42", Format: "count: %s"},
+	}
+
+	result := Tree(tree, sess, map[string]any{}, map[string]string{})
+	if result != "count: 42" {
+		t.Errorf("expected 'count: 42', got %q", result)
+	}
+}
+
+func TestTree_CommandWhenPasses(t *testing.T) {
+	style.SetColorLevel(0)
+	defer style.SetColorLevel(1)
+
+	sess := &types.SessionData{CWD: "/tmp"}
+	tree := []types.SegmentNode{
+		{Command: "echo hello", When: "text != ''"},
+	}
+
+	result := Tree(tree, sess, map[string]any{}, map[string]string{})
+	if result != "hello" {
+		t.Errorf("expected 'hello', got %q", result)
+	}
+}
+
+func TestTree_CommandWhenFails(t *testing.T) {
+	sess := &types.SessionData{CWD: "/tmp"}
+	tree := []types.SegmentNode{
+		{Command: "echo 0", When: "text != '0'"},
+	}
+
+	result := Tree(tree, sess, map[string]any{}, map[string]string{})
+	if result != "" {
+		t.Errorf("expected empty (when failed), got %q", result)
+	}
+}
+
+func TestTree_CommandWithInterpolation(t *testing.T) {
+	style.SetColorLevel(0)
+	defer style.SetColorLevel(1)
+
+	sess := &types.SessionData{CWD: "/tmp"}
+	env := map[string]any{
+		"test": map[string]any{"name": "world"},
+	}
+	tree := []types.SegmentNode{
+		{Command: "echo ${test.name}"},
+	}
+
+	result := Tree(tree, sess, env, map[string]string{})
+	if result != "world" {
+		t.Errorf("expected 'world', got %q", result)
+	}
+}
+
+func TestTree_ExprTakesPrecedenceOverCommand(t *testing.T) {
+	style.SetColorLevel(0)
+	defer style.SetColorLevel(1)
+
+	sess := &types.SessionData{CWD: "/tmp"}
+	env := map[string]any{
+		"test": map[string]any{"name": "from-expr"},
+	}
+	tree := []types.SegmentNode{
+		{Expr: "test.name", Command: "echo from-command"},
+	}
+
+	result := Tree(tree, sess, env, map[string]string{})
+	if result != "from-expr" {
+		t.Errorf("expected 'from-expr' (expr precedence), got %q", result)
+	}
+}
+
 // testProvider implements DataProvider for tests.
 type testProvider struct{}
 

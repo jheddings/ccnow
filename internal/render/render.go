@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/jheddings/ccglow/internal/command"
 	"github.com/jheddings/ccglow/internal/eval"
 	"github.com/jheddings/ccglow/internal/style"
 	"github.com/jheddings/ccglow/internal/types"
@@ -78,6 +79,13 @@ func renderNode(
 			return nil
 		}
 		raw = result
+		hasValue = true
+	} else if node.Command != "" {
+		output := command.Run(node.Command, env, session.CWD, command.DefaultTimeout)
+		if output == "" {
+			return nil
+		}
+		raw = output
 		hasValue = true
 	}
 

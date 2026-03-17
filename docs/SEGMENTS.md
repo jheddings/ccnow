@@ -125,7 +125,7 @@ Battery segments return zero values on machines without a battery.
 
 ## Node Types
 
-There are two kinds of atomic nodes:
+There are three kinds of atomic nodes:
 
 ### `expr` — Expression nodes
 
@@ -146,6 +146,37 @@ Render a fixed string. Use these for separators, icons, and line breaks.
 { "value": "\n" }
 { "value": "\ue0b0", "style": { "color": "#DC0000", "bgcolor": "#3A3A3A" } }
 ```
+
+### `command` — Shell command nodes
+
+Run a shell command and render its stdout. The command is executed via `sh -c`
+with a 2-second timeout. If the command produces empty output, exits non-zero,
+or times out, the node collapses.
+
+```json
+{ "command": "cat VERSION", "style": { "color": "cyan" } }
+{ "command": "date +%H:%M" }
+```
+
+#### Variable substitution
+
+Use `${provider.field}` to inject resolved provider values into the command
+string. Variables are replaced before execution. Unresolved references become
+empty strings.
+
+```json
+{ "command": "gh pr list --repo ${git.owner}/${git.repo} --json number --jq length", "when": "text != '' && text != '0'" }
+```
+
+#### Behavior
+
+- **Timeout**: Commands have a 2-second timeout. Long-running commands are
+  killed and the node collapses.
+- **Working directory**: Commands run in the session's current working directory.
+- **Collapse**: Empty stdout, non-zero exit, or timeout all cause the node to
+  collapse silently, just like an `expr` node with no data.
+- **Precedence**: If both `expr` and `command` are set on the same node, `expr`
+  wins. The dispatch order is: Children > Value > Expr > Command.
 
 ## Node Properties
 

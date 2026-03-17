@@ -64,6 +64,7 @@ type StyleAttrs struct {
 type SegmentNode struct {
 	Expr     string        `json:"expr,omitempty"`
 	Value    any           `json:"value,omitempty"`
+	Command  string        `json:"command,omitempty"`
 	Format   string        `json:"format,omitempty"`
 	When     string        `json:"when,omitempty"`
 	Enabled  *bool         `json:"enabled,omitempty"`
