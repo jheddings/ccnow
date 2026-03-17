@@ -399,6 +399,38 @@ func TestBuildEnv(t *testing.T) {
 	}
 }
 
+func TestBuildEnv_Metrics(t *testing.T) {
+	providers := map[string]types.DataProvider{
+		"test": &testProvider{},
+	}
+	sess := &types.SessionData{CWD: "/tmp"}
+
+	env, _ := BuildEnv(providers, sess)
+
+	test, ok := env["test"].(map[string]any)
+	if !ok {
+		t.Fatal("expected test namespace in env")
+	}
+
+	metrics, ok := test["__metrics__"].(map[string]any)
+	if !ok {
+		t.Fatal("expected __metrics__ in test namespace")
+	}
+
+	duration, ok := metrics["duration_ms"]
+	if !ok {
+		t.Fatal("expected duration_ms in __metrics__")
+	}
+
+	dur, ok := duration.(float64)
+	if !ok {
+		t.Fatalf("expected duration_ms to be float64, got %T", duration)
+	}
+	if dur < 0 {
+		t.Errorf("expected non-negative duration, got %f", dur)
+	}
+}
+
 // testProvider implements DataProvider for tests.
 type testProvider struct{}
 

@@ -3,6 +3,7 @@ package render
 import (
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/jheddings/ccglow/internal/eval"
 	"github.com/jheddings/ccglow/internal/style"
@@ -145,13 +146,21 @@ func BuildEnv(
 		wg.Add(1)
 		go func(prov types.DataProvider) {
 			defer wg.Done()
+			start := time.Now()
 			result, err := prov.Resolve(session)
+			elapsed := time.Since(start)
 			if err != nil {
 				log.Warn().Err(err).Str("provider", prov.Name()).Msg("provider resolve failed")
 				return
 			}
 			mu.Lock()
 			for k, v := range result.Values {
+				// inject __metrics__ into the provider's value subtree
+				if m, ok := v.(map[string]any); ok {
+					m["__metrics__"] = map[string]any{
+						"duration_ms": elapsed.Seconds() * 1000,
+					}
+				}
 				env[k] = v
 			}
 			for k, v := range result.Formats {
