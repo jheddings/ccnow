@@ -10,7 +10,6 @@ import (
 	"github.com/jheddings/ccglow/internal/preset"
 	"github.com/jheddings/ccglow/internal/provider"
 	"github.com/jheddings/ccglow/internal/render"
-	"github.com/jheddings/ccglow/internal/segment"
 	"github.com/jheddings/ccglow/internal/session"
 	"github.com/jheddings/ccglow/internal/style"
 	"github.com/jheddings/ccglow/internal/types"
@@ -120,28 +119,16 @@ func run(presetName, configPath, format, stdin string) string {
 	}
 	defer style.SetColorLevel(1)
 
-	segments := segment.NewRegistry()
-	segment.RegisterBuiltin(segments)
-
 	providers := provider.NewRegistry()
 	provider.RegisterBuiltin(providers)
-
-	tagIdx, err := render.BuildTagIndex(providers.All())
-	if err != nil {
-		log.Error().Err(err).Msg("tag index error")
-		return ""
-	}
 
 	tree := resolveTree(presetName, configPath)
 	log.Debug().Int("count", len(tree)).Msg("tree resolved")
 
-	providerNames := render.CollectProviderNames(tree, tagIdx)
-	log.Debug().Int("count", len(providerNames)).Msg("providers collected")
+	env, defaultFormats := render.BuildEnv(providers.All(), sess)
+	log.Debug().Int("providers", len(env)).Msg("env built")
 
-	providerData := render.ResolveProviders(providerNames, providers.All(), sess)
-	segmentValues := render.ResolveSegmentValues(tagIdx, providerData)
-
-	output := render.Tree(tree, segments, sess, providerData, segmentValues, tagIdx)
+	output := render.Tree(tree, sess, env, defaultFormats)
 	log.Debug().Msg("render complete")
 
 	return output

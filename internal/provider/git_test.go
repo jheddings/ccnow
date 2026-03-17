@@ -54,6 +54,10 @@ func initTempRepo(t *testing.T) string {
 	return dir
 }
 
+func gitValues(result *types.ProviderResult) map[string]any {
+	return result.Values["git"].(map[string]any)
+}
+
 func TestGitStatusCounts(t *testing.T) {
 	skipWithoutGit(t)
 	dir := initTempRepo(t)
@@ -77,21 +81,15 @@ func TestGitStatusCounts(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*GitData)
-	if data.Modified == nil {
-		t.Error("expected non-nil Modified")
-	} else if *data.Modified != 1 {
-		t.Errorf("expected 1 modified, got %d", *data.Modified)
+	git := gitValues(result)
+	if git["modified"] != 1 {
+		t.Errorf("expected 1 modified, got %v", git["modified"])
 	}
-	if data.Staged == nil {
-		t.Error("expected non-nil Staged")
-	} else if *data.Staged != 1 {
-		t.Errorf("expected 1 staged, got %d", *data.Staged)
+	if git["staged"] != 1 {
+		t.Errorf("expected 1 staged, got %v", git["staged"])
 	}
-	if data.Untracked == nil {
-		t.Error("expected non-nil Untracked")
-	} else if *data.Untracked != 1 {
-		t.Errorf("expected 1 untracked, got %d", *data.Untracked)
+	if git["untracked"] != 1 {
+		t.Errorf("expected 1 untracked, got %v", git["untracked"])
 	}
 }
 
@@ -106,18 +104,15 @@ func TestGitStatusClean(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*GitData)
-	if data.Modified == nil {
-		t.Fatal("expected non-nil Modified for clean repo")
+	git := gitValues(result)
+	if git["modified"] != 0 {
+		t.Errorf("expected 0 modified, got %v", git["modified"])
 	}
-	if *data.Modified != 0 {
-		t.Errorf("expected 0 modified, got %d", *data.Modified)
+	if git["staged"] != 0 {
+		t.Errorf("expected 0 staged, got %v", git["staged"])
 	}
-	if data.Staged == nil || *data.Staged != 0 {
-		t.Errorf("expected 0 staged, got %v", data.Staged)
-	}
-	if data.Untracked == nil || *data.Untracked != 0 {
-		t.Errorf("expected 0 untracked, got %v", data.Untracked)
+	if git["untracked"] != 0 {
+		t.Errorf("expected 0 untracked, got %v", git["untracked"])
 	}
 }
 
@@ -140,12 +135,9 @@ func TestGitWorktreeDetection(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*GitData)
-	if data.Worktree == nil {
-		t.Fatal("expected non-nil Worktree in linked worktree")
-	}
-	if *data.Worktree != "my-worktree" {
-		t.Errorf("expected worktree name 'my-worktree', got %q", *data.Worktree)
+	git := gitValues(result)
+	if git["worktree"] != "my-worktree" {
+		t.Errorf("expected worktree name 'my-worktree', got %q", git["worktree"])
 	}
 }
 
@@ -167,18 +159,12 @@ func TestGitRemoteOwnerRepo(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*GitData)
-	if data.Owner == nil {
-		t.Fatal("expected non-nil Owner")
+	git := gitValues(result)
+	if git["owner"] != "myowner" {
+		t.Errorf("expected owner 'myowner', got %q", git["owner"])
 	}
-	if *data.Owner != "myowner" {
-		t.Errorf("expected owner 'myowner', got %q", *data.Owner)
-	}
-	if data.Repo == nil {
-		t.Fatal("expected non-nil Repo")
-	}
-	if *data.Repo != "myrepo" {
-		t.Errorf("expected repo 'myrepo', got %q", *data.Repo)
+	if git["repo"] != "myrepo" {
+		t.Errorf("expected repo 'myrepo', got %q", git["repo"])
 	}
 }
 
@@ -200,18 +186,12 @@ func TestGitRemoteSSH(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*GitData)
-	if data.Owner == nil {
-		t.Fatal("expected non-nil Owner")
+	git := gitValues(result)
+	if git["owner"] != "sshowner" {
+		t.Errorf("expected owner 'sshowner', got %q", git["owner"])
 	}
-	if *data.Owner != "sshowner" {
-		t.Errorf("expected owner 'sshowner', got %q", *data.Owner)
-	}
-	if data.Repo == nil {
-		t.Fatal("expected non-nil Repo")
-	}
-	if *data.Repo != "sshrepo" {
-		t.Errorf("expected repo 'sshrepo', got %q", *data.Repo)
+	if git["repo"] != "sshrepo" {
+		t.Errorf("expected repo 'sshrepo', got %q", git["repo"])
 	}
 }
 
@@ -228,12 +208,12 @@ func TestGitRemoteNoOrigin(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*GitData)
-	if data.Owner != nil {
-		t.Errorf("expected nil Owner, got %q", *data.Owner)
+	git := gitValues(result)
+	if git["owner"] != "" {
+		t.Errorf("expected empty Owner, got %q", git["owner"])
 	}
-	if data.Repo != nil {
-		t.Errorf("expected nil Repo, got %q", *data.Repo)
+	if git["repo"] != "" {
+		t.Errorf("expected empty Repo, got %q", git["repo"])
 	}
 }
 
@@ -248,8 +228,8 @@ func TestGitWorktreeMainCopy(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*GitData)
-	if data.Worktree != nil {
-		t.Errorf("expected nil Worktree in main copy, got %q", *data.Worktree)
+	git := gitValues(result)
+	if git["worktree"] != "" {
+		t.Errorf("expected empty Worktree in main copy, got %q", git["worktree"])
 	}
 }

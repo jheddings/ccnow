@@ -18,8 +18,8 @@ func TestCostProvider(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*CostData)
-	if *data.USD != "$12.50" {
-		t.Errorf("expected $12.50, got %s", *data.USD)
+	cost := result.Values["cost"].(map[string]any)
+	if cost["usd"] != "$12.50" {
+		t.Errorf("expected $12.50, got %s", cost["usd"])
 	}
 }

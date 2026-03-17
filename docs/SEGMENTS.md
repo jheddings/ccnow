@@ -3,9 +3,9 @@
 Every segment renders a single piece of data — a branch name, a token count, a
 dollar amount. Compose them into any layout you want.
 
-Segments are identified by `provider.field` names. The prefix determines which
-provider fetches the data; the suffix picks the specific value. If a segment has
-nothing to show (no git repo, no cost data yet), it returns empty and silently
+Segments are identified by `provider.field` expressions. The prefix determines
+which provider fetches the data; the suffix picks the specific value. If a
+segment has nothing to show (empty string, no data available), it silently
 collapses out of the output.
 
 ## Directory — `pwd`
@@ -36,7 +36,8 @@ navigable path display.
 
 All git segments require a git repository in the current working directory.
 Remote-based segments (`git.owner`, `git.repo`) parse the `origin` remote URL
-and handle both SSH and HTTPS formats.
+and handle both SSH and HTTPS formats. When not in a git repo, all git segments
+return their zero values (`""` for strings, `0` for integers).
 
 ## Context — `context`
 
@@ -93,52 +94,54 @@ scales the same way as tokens: raw below 1K, `n.nK t/s` above.
 | `claude.version` | Claude Code application version | `2.1.75`       |
 | `claude.style`   | Current output style            | `concise`      |
 
-## Utility Segments
+## Node Types
 
-These segments don't use a provider — they're structural.
+There are two kinds of atomic nodes:
 
-| Segment   | Description                                                        |
-| --------- | ------------------------------------------------------------------ |
-| `literal` | Renders static text. Requires a `text` property (see below).       |
-| `newline` | Renders a line break — use this for multi-line statusline layouts. |
+### `expr` — Expression nodes
 
-### The `literal` segment
-
-`literal` is the only segment that requires a property. Set `text` in the
-`props` object:
+Evaluate an expression against the provider data environment. This is the
+primary way to display provider values.
 
 ```json
-{
-  "segment": "literal",
-  "props": { "text": "|" },
-  "style": { "color": "240" }
-}
+{ "expr": "git.branch", "style": { "bold": true } }
+{ "expr": "context.percent.used", "style": { "prefix": " (" , "suffix": ")" } }
 ```
 
-## Segment Properties
+### `value` — Static value nodes
+
+Render a fixed string. Use these for separators, icons, and line breaks.
+
+```json
+{ "value": "|", "style": { "color": "240" } }
+{ "value": "\n" }
+{ "value": "\ue0b0", "style": { "color": "#DC0000", "bgcolor": "#3A3A3A" } }
+```
+
+## Node Properties
 
 ### `format`
 
-Data segments accept an optional `format` string that controls how the raw
+Expression nodes accept an optional `format` string that controls how the raw
 value is displayed. Uses Go's `fmt.Sprintf` syntax.
 
 ```json
-{ "segment": "git.insertions", "format": "+%d" }
-{ "segment": "context.percent.used", "format": "(%d%%)" }
+{ "expr": "git.insertions", "format": "+%d" }
+{ "expr": "context.percent.used", "format": "(%d%%)" }
 ```
 
-If no format is specified, the segment uses its default format (declared in
+If no format is specified, the node uses its default format (declared by
 the provider) or falls back to the raw value as a string.
 
 ### `when`
 
-Any segment can conditionally show or hide based on its data. See
+Any node can conditionally show or hide based on data. See
 **[Conditional Visibility](WHEN.md)** for the full reference.
 
 ```json
-{ "segment": "git.branch", "when": ".branch != '' && .branch != 'main'" }
-{ "segment": "context.percent.used", "when": ".percent >= 50" }
-{ "segment": "git.modified", "when": "value > 0" }
+{ "expr": "git.branch", "when": "git.branch != '' && git.branch != 'main'" }
+{ "expr": "context.percent.used", "when": "context.percent.used >= 50" }
+{ "expr": "git.modified", "when": "value > 0" }
 ```
 
 ### `enabled`
@@ -155,24 +158,20 @@ output. Use composites for sections that should appear or disappear together.
 
 ```json
 {
-  "provider": "git",
-  "when": ".branch != ''",
+  "when": "git.branch != ''",
   "style": { "prefix": " | " },
   "children": [
-    { "segment": "git.branch", "style": { "bold": true } },
-    { "segment": "git.insertions", "style": { "color": "green", "prefix": " +" } },
-    { "segment": "git.deletions", "style": { "color": "red", "prefix": " -" } }
+    { "expr": "git.branch", "style": { "bold": true } },
+    {
+      "expr": "git.insertions",
+      "when": "value > 0",
+      "style": { "color": "green", "prefix": " +" }
+    },
+    { "expr": "git.deletions", "when": "value > 0", "style": { "color": "red", "prefix": " -" } }
   ]
 }
 ```
 
-Composites support `when` with an explicit `provider` field, allowing you to
-gate entire sections on a condition. See [WHEN.md](WHEN.md) for details.
-
-## Provider Auto-Wiring
-
-You don't need to set `"provider"` explicitly on data segments. The segment
-name maps to its provider automatically via struct tags in the source code.
-
-Each provider fetches its data once and caches it — so ten git segments don't
-mean ten calls to `git status`.
+Composites support `when` expressions that can reference any provider's data,
+allowing you to gate entire sections on any condition. See
+[WHEN.md](WHEN.md) for details.

@@ -27,6 +27,14 @@ func TestFormatDuration(t *testing.T) {
 	}
 }
 
+func sessionValues(result *types.ProviderResult) map[string]any {
+	return result.Values["session"].(map[string]any)
+}
+
+func sessionDuration(result *types.ProviderResult) map[string]any {
+	return sessionValues(result)["duration"].(map[string]any)
+}
+
 func TestSessionProvider(t *testing.T) {
 	p := &sessionProvider{}
 	sess := &types.SessionData{
@@ -44,18 +52,20 @@ func TestSessionProvider(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*SessionData)
-	if *data.Duration != "1h 30m" {
-		t.Errorf("expected 1h 30m, got %s", *data.Duration)
+	dur := sessionDuration(result)
+	if dur["total"] != "1h 30m" {
+		t.Errorf("expected 1h 30m, got %s", dur["total"])
 	}
-	if *data.APIDuration != "8m" {
-		t.Errorf("expected 8m, got %s", *data.APIDuration)
+	if dur["api"] != "8m" {
+		t.Errorf("expected 8m, got %s", dur["api"])
 	}
-	if *data.LinesAdded != 100 {
-		t.Errorf("expected 100 lines added, got %d", *data.LinesAdded)
+
+	s := sessionValues(result)
+	if s["lines-added"] != 100 {
+		t.Errorf("expected 100 lines added, got %v", s["lines-added"])
 	}
-	if *data.LinesRemoved != 50 {
-		t.Errorf("expected 50 lines removed, got %d", *data.LinesRemoved)
+	if s["lines-removed"] != 50 {
+		t.Errorf("expected 50 lines removed, got %v", s["lines-removed"])
 	}
 }
 
@@ -71,9 +81,9 @@ func TestSessionProviderID(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*SessionData)
-	if data.ID == nil || *data.ID != "abc-123" {
-		t.Errorf("expected abc-123, got %v", data.ID)
+	s := sessionValues(result)
+	if s["id"] != "abc-123" {
+		t.Errorf("expected abc-123, got %v", s["id"])
 	}
 }
 
@@ -86,8 +96,8 @@ func TestSessionProviderNoID(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*SessionData)
-	if data.ID != nil {
-		t.Errorf("expected nil ID, got %v", data.ID)
+	s := sessionValues(result)
+	if s["id"] != "" {
+		t.Errorf("expected empty ID, got %v", s["id"])
 	}
 }

@@ -5,8 +5,8 @@ import "testing"
 func TestParse_Valid(t *testing.T) {
 	input := `{
 		"segments": [
-			{"segment": "pwd.name", "style": {"color": "red"}},
-			{"segment": "git.branch"}
+			{"expr": "pwd.name", "style": {"color": "red"}},
+			{"expr": "git.branch"}
 		]
 	}`
 
@@ -17,8 +17,8 @@ func TestParse_Valid(t *testing.T) {
 	if len(nodes) != 2 {
 		t.Fatalf("expected 2 nodes, got %d", len(nodes))
 	}
-	if nodes[0].Type != "pwd.name" {
-		t.Errorf("expected pwd.name, got %s", nodes[0].Type)
+	if nodes[0].Expr != "pwd.name" {
+		t.Errorf("expected pwd.name, got %s", nodes[0].Expr)
 	}
 }
 
@@ -26,10 +26,9 @@ func TestParse_WithChildren(t *testing.T) {
 	input := `{
 		"segments": [
 			{
-				"segment": "group",
 				"children": [
-					{"segment": "git.branch"},
-					{"segment": "git.insertions"}
+					{"expr": "git.branch"},
+					{"expr": "git.insertions"}
 				]
 			}
 		]
@@ -47,8 +46,8 @@ func TestParse_WithChildren(t *testing.T) {
 	}
 }
 
-func TestParse_LiteralNoProvider(t *testing.T) {
-	input := `{"segments": [{"segment": "literal", "props": {"text": "hi"}}]}`
+func TestParse_ValueNode(t *testing.T) {
+	input := `{"segments": [{"value": "|", "style": {"color": "240"}}]}`
 
 	nodes, err := Parse([]byte(input))
 	if err != nil {
@@ -56,6 +55,9 @@ func TestParse_LiteralNoProvider(t *testing.T) {
 	}
 	if len(nodes) != 1 {
 		t.Fatalf("expected 1 node, got %d", len(nodes))
+	}
+	if nodes[0].Value != "|" {
+		t.Errorf("expected value '|', got %v", nodes[0].Value)
 	}
 }
 
@@ -67,7 +69,7 @@ func TestParse_InvalidJSON(t *testing.T) {
 }
 
 func TestParse_WithFormat(t *testing.T) {
-	input := `{"segments": [{"segment": "context.percent", "format": "%d%%"}]}`
+	input := `{"segments": [{"expr": "context.percent.used", "format": "%d%%"}]}`
 
 	nodes, err := Parse([]byte(input))
 	if err != nil {
@@ -75,5 +77,17 @@ func TestParse_WithFormat(t *testing.T) {
 	}
 	if nodes[0].Format != "%d%%" {
 		t.Errorf("expected format, got %q", nodes[0].Format)
+	}
+}
+
+func TestParse_SkipsEmptyNodes(t *testing.T) {
+	input := `{"segments": [{"style": {"color": "red"}}, {"expr": "pwd.name"}]}`
+
+	nodes, err := Parse([]byte(input))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(nodes) != 1 {
+		t.Fatalf("expected 1 node (empty skipped), got %d", len(nodes))
 	}
 }

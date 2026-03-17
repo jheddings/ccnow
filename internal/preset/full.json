@@ -1,28 +1,27 @@
 {
   "segments": [
     {
-      "segment": "pwd.smart",
+      "expr": "pwd.smart",
       "style": {
         "color": "31",
         "prefix": "\uf07b "
       }
     },
     {
-      "segment": "pwd.name",
+      "expr": "pwd.name",
       "style": {
         "color": "39",
         "bold": true
       }
     },
     {
-      "segment": "group",
       "style": {
         "prefix": " | ",
         "color": "240"
       },
       "children": [
         {
-          "segment": "git.branch",
+          "expr": "git.branch",
           "style": {
             "color": "whiteBright",
             "bold": true,
@@ -30,20 +29,21 @@
           }
         },
         {
-          "segment": "group",
           "style": {
             "prefix": " · "
           },
           "children": [
             {
-              "segment": "git.insertions",
+              "expr": "git.insertions",
+              "when": "value > 0",
               "style": {
                 "color": "green",
                 "prefix": "+"
               }
             },
             {
-              "segment": "git.deletions",
+              "expr": "git.deletions",
+              "when": "value > 0",
               "style": {
                 "color": "red",
                 "prefix": " -"
@@ -54,16 +54,15 @@
       ]
     },
     {
-      "segment": "group",
       "style": {
         "prefix": " | "
       },
       "children": [
         {
-          "segment": "model.name"
+          "expr": "model.name"
         },
         {
-          "segment": "model.id",
+          "expr": "model.id",
           "style": {
             "color": "240",
             "prefix": " "
@@ -72,13 +71,12 @@
       ]
     },
     {
-      "segment": "group",
       "style": {
         "prefix": " · "
       },
       "children": [
         {
-          "segment": "context.tokens",
+          "expr": "context.tokens",
           "style": {
             "color": "white",
             "bold": true,
@@ -86,14 +84,14 @@
           }
         },
         {
-          "segment": "context.size",
+          "expr": "context.size",
           "style": {
             "color": "white",
             "prefix": "/"
           }
         },
         {
-          "segment": "context.percent.used",
+          "expr": "context.percent.used",
           "style": {
             "color": "white",
             "prefix": " (",
@@ -101,7 +99,8 @@
           }
         },
         {
-          "segment": "context.percent.remaining",
+          "expr": "context.percent.remaining",
+          "when": "value > 0",
           "style": {
             "color": "white",
             "prefix": " [",
@@ -111,13 +110,12 @@
       ]
     },
     {
-      "segment": "group",
       "style": {
         "prefix": " · "
       },
       "children": [
         {
-          "segment": "cost.usd",
+          "expr": "cost.usd",
           "style": {
             "color": "yellow",
             "bold": true
@@ -126,20 +124,19 @@
       ]
     },
     {
-      "segment": "group",
       "style": {
         "prefix": " · "
       },
       "children": [
         {
-          "segment": "claude.version",
+          "expr": "claude.version",
           "style": {
             "color": "240",
             "prefix": "v"
           }
         },
         {
-          "segment": "claude.style",
+          "expr": "claude.style",
           "style": {
             "color": "cyan",
             "prefix": " · "
@@ -148,13 +145,12 @@
       ]
     },
     {
-      "segment": "group",
       "style": {
         "prefix": " · "
       },
       "children": [
         {
-          "segment": "session.duration.total",
+          "expr": "session.duration.total",
           "style": {
             "color": "magenta",
             "prefix": "\uf017 "
@@ -163,20 +159,21 @@
       ]
     },
     {
-      "segment": "group",
       "style": {
         "prefix": " · "
       },
       "children": [
         {
-          "segment": "session.lines-added",
+          "expr": "session.lines-added",
+          "when": "value > 0",
           "style": {
             "color": "green",
             "prefix": "+"
           }
         },
         {
-          "segment": "session.lines-removed",
+          "expr": "session.lines-removed",
+          "when": "value > 0",
           "style": {
             "color": "red",
             "prefix": " -"

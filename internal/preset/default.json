@@ -1,42 +1,43 @@
 {
   "segments": [
     {
-      "segment": "pwd.smart",
+      "expr": "pwd.smart",
       "style": {
         "color": "31"
       }
     },
     {
-      "segment": "pwd.name",
+      "expr": "pwd.name",
       "style": {
         "color": "39",
         "bold": true
       }
     },
     {
-      "segment": "group",
       "style": {
         "prefix": " | ",
         "color": "240"
       },
       "children": [
         {
-          "segment": "git.branch",
+          "expr": "git.branch",
           "style": {
             "color": "whiteBright",
             "bold": true,
-            "prefix": " "
+            "prefix": " "
           }
         },
         {
-          "segment": "git.insertions",
+          "expr": "git.insertions",
+          "when": "value > 0",
           "style": {
             "color": "green",
             "prefix": " · +"
           }
         },
         {
-          "segment": "git.deletions",
+          "expr": "git.deletions",
+          "when": "value > 0",
           "style": {
             "color": "red",
             "prefix": " -"
@@ -45,20 +46,19 @@
       ]
     },
     {
-      "segment": "group",
       "style": {
         "prefix": " | "
       },
       "children": [
         {
-          "segment": "context.tokens",
+          "expr": "context.tokens",
           "style": {
             "color": "white",
             "bold": true
           }
         },
         {
-          "segment": "context.percent.used",
+          "expr": "context.percent.used",
           "style": {
             "color": "white",
             "prefix": " (",
@@ -68,7 +68,7 @@
       ]
     },
     {
-      "segment": "session.duration.total",
+      "expr": "session.duration.total",
       "style": {
         "color": "magenta",
         "prefix": " · "

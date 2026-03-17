@@ -6,48 +6,45 @@ import (
 	"github.com/jheddings/ccglow/internal/types"
 )
 
-// SessionData holds resolved session timing and line-change data.
-type SessionData struct {
-	Duration     *string `segment:"session.duration.total"`
-	APIDuration  *string `segment:"session.duration.api"`
-	LinesAdded   *int    `segment:"session.lines-added"`
-	LinesRemoved *int    `segment:"session.lines-removed"`
-	ID           *string `segment:"session.id"`
-}
-
-func (p *sessionProvider) Fields() any { return &SessionData{} }
-
 type sessionProvider struct{}
 
 func (p *sessionProvider) Name() string { return "session" }
 
-func (p *sessionProvider) Resolve(session *types.SessionData) (any, error) {
-	data := &SessionData{}
+func (p *sessionProvider) Resolve(session *types.SessionData) (*types.ProviderResult, error) {
+	sess := map[string]any{
+		"duration": map[string]any{
+			"total": "",
+			"api":   "",
+		},
+		"lines-added":   0,
+		"lines-removed": 0,
+		"id":            "",
+	}
+
+	result := &types.ProviderResult{
+		Values: map[string]any{"session": sess},
+	}
 
 	if session.SessionID != "" {
-		data.ID = &session.SessionID
+		sess["id"] = session.SessionID
 	}
 
 	if session.Cost == nil {
-		return data, nil
+		return result, nil
 	}
 
-	dur := FormatDuration(session.Cost.TotalDurationMS)
-	data.Duration = &dur
-
-	apiDur := FormatDuration(session.Cost.TotalAPIDurationMS)
-	data.APIDuration = &apiDur
+	dur := sess["duration"].(map[string]any)
+	dur["total"] = FormatDuration(session.Cost.TotalDurationMS)
+	dur["api"] = FormatDuration(session.Cost.TotalAPIDurationMS)
 
 	if session.Cost.TotalLinesAdded > 0 {
-		n := session.Cost.TotalLinesAdded
-		data.LinesAdded = &n
+		sess["lines-added"] = session.Cost.TotalLinesAdded
 	}
 	if session.Cost.TotalLinesRemoved > 0 {
-		n := session.Cost.TotalLinesRemoved
-		data.LinesRemoved = &n
+		sess["lines-removed"] = session.Cost.TotalLinesRemoved
 	}
 
-	return data, nil
+	return result, nil
 }
 
 // FormatDuration formats milliseconds into a human-readable duration.

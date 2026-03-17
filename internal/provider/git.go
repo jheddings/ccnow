@@ -14,65 +14,66 @@ import (
 
 const gitTimeout = 5 * time.Second
 
-// GitData holds resolved git repository information.
-type GitData struct {
-	Branch     *string `segment:"git.branch"`
-	Insertions *int    `segment:"git.insertions"`
-	Deletions  *int    `segment:"git.deletions"`
-	Modified   *int    `segment:"git.modified"`
-	Staged     *int    `segment:"git.staged"`
-	Untracked  *int    `segment:"git.untracked"`
-	Worktree   *string `segment:"git.worktree"`
-	Owner      *string `segment:"git.owner"`
-	Repo       *string `segment:"git.repo"`
-}
-
-func (p *gitProvider) Fields() any { return &GitData{} }
-
 type gitProvider struct{}
 
 func (p *gitProvider) Name() string { return "git" }
 
-func (p *gitProvider) Resolve(session *types.SessionData) (any, error) {
+func (p *gitProvider) Resolve(session *types.SessionData) (*types.ProviderResult, error) {
 	cwd := session.CWD
 
-	if !gitAvailable(cwd) {
-		return &GitData{}, nil
+	git := map[string]any{
+		"branch":     "",
+		"insertions": 0,
+		"deletions":  0,
+		"modified":   0,
+		"staged":     0,
+		"untracked":  0,
+		"worktree":   "",
+		"owner":      "",
+		"repo":       "",
 	}
 
-	data := &GitData{}
+	result := &types.ProviderResult{
+		Values: map[string]any{"git": git},
+	}
+
+	if !gitAvailable(cwd) {
+		return result, nil
+	}
 
 	if branch, err := gitExec(cwd, "branch", "--show-current"); err == nil && branch != "" {
-		data.Branch = &branch
+		git["branch"] = branch
 	}
 
 	if diff, err := gitExec(cwd, "diff", "--shortstat", "HEAD"); err == nil && diff != "" {
 		if m := insertionRe.FindStringSubmatch(diff); len(m) > 1 {
 			var n int
 			fmt.Sscanf(m[1], "%d", &n)
-			data.Insertions = &n
+			git["insertions"] = n
 		}
 		if m := deletionRe.FindStringSubmatch(diff); len(m) > 1 {
 			var n int
 			fmt.Sscanf(m[1], "%d", &n)
-			data.Deletions = &n
+			git["deletions"] = n
 		}
 	}
 
 	if mod, stg, unt, err := parseGitStatus(cwd); err == nil {
-		data.Modified = intPtr(mod)
-		data.Staged = intPtr(stg)
-		data.Untracked = intPtr(unt)
+		git["modified"] = mod
+		git["staged"] = stg
+		git["untracked"] = unt
 	}
 
-	data.Worktree = detectWorktree(cwd)
+	if wt := detectWorktree(cwd); wt != "" {
+		git["worktree"] = wt
+	}
 
 	if owner, repo, err := parseRemoteOwnerRepo(cwd); err == nil {
-		data.Owner = &owner
-		data.Repo = &repo
+		git["owner"] = owner
+		git["repo"] = repo
 	}
 
-	return data, nil
+	return result, nil
 }
 
 func parseGitStatus(cwd string) (modified, staged, untracked int, err error) {
@@ -106,18 +107,16 @@ func parseGitStatus(cwd string) (modified, staged, untracked int, err error) {
 	return modified, staged, untracked, nil
 }
 
-func intPtr(n int) *int { return &n }
-
 // detectWorktree returns the worktree name if cwd is inside a linked
-// worktree, or nil if it is the main working copy.
-func detectWorktree(cwd string) *string {
+// worktree, or empty string if it is the main working copy.
+func detectWorktree(cwd string) string {
 	gitDir, err := gitExec(cwd, "rev-parse", "--git-dir")
 	if err != nil {
-		return nil
+		return ""
 	}
 	commonDir, err := gitExec(cwd, "rev-parse", "--git-common-dir")
 	if err != nil {
-		return nil
+		return ""
 	}
 	// Normalize to absolute paths for comparison
 	if !filepath.IsAbs(gitDir) {
@@ -130,16 +129,15 @@ func detectWorktree(cwd string) *string {
 	commonDir = filepath.Clean(commonDir)
 
 	if gitDir == commonDir {
-		return nil // main working copy
+		return "" // main working copy
 	}
 
-	// In a linked worktree — get the worktree root name
+	// In a linked worktree -- get the worktree root name
 	toplevel, err := gitExec(cwd, "rev-parse", "--show-toplevel")
 	if err != nil {
-		return nil
+		return ""
 	}
-	name := filepath.Base(toplevel)
-	return &name
+	return filepath.Base(toplevel)
 }
 
 // parseRemoteOwnerRepo extracts the owner and repository name from the
@@ -153,10 +151,10 @@ func parseRemoteOwnerRepo(cwd string) (owner, repo string, err error) {
 
 	// Normalize SSH URLs: git@host:owner/repo -> host/owner/repo
 	if strings.Contains(url, ":") && !strings.Contains(url, "://") {
-		// SSH format — replace first ":" after the host with "/"
+		// SSH format -- replace first ":" after the host with "/"
 		url = url[strings.Index(url, ":")+1:]
 	} else {
-		// HTTPS format — strip scheme and host
+		// HTTPS format -- strip scheme and host
 		// e.g. https://github.com/owner/repo.git -> /owner/repo.git
 		if idx := strings.Index(url, "://"); idx != -1 {
 			url = url[idx+3:]

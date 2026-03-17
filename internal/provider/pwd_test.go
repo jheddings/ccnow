@@ -16,12 +16,12 @@ func TestPwdProvider(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*PwdData)
-	if data.Name != "myapp" {
-		t.Errorf("expected myapp, got %s", data.Name)
+	pwd := result.Values["pwd"].(map[string]any)
+	if pwd["name"] != "myapp" {
+		t.Errorf("expected myapp, got %s", pwd["name"])
 	}
-	if data.Path != "/home/user/projects/" {
-		t.Errorf("expected /home/user/projects/, got %s", data.Path)
+	if pwd["path"] != "/home/user/projects/" {
+		t.Errorf("expected /home/user/projects/, got %s", pwd["path"])
 	}
 }
 
@@ -45,7 +45,7 @@ func TestSmartPrefix(t *testing.T) {
 		// Home directory itself
 		{home, ""},
 
-		// First level under home (the bug case — was producing "~//")
+		// First level under home (the bug case -- was producing "~//")
 		{home + "/Projects", "~/"},
 
 		// Two levels under home

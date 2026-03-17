@@ -28,6 +28,14 @@ func TestFormatTokens(t *testing.T) {
 	}
 }
 
+func contextValues(result *types.ProviderResult) map[string]any {
+	return result.Values["context"].(map[string]any)
+}
+
+func contextPercent(result *types.ProviderResult) map[string]any {
+	return contextValues(result)["percent"].(map[string]any)
+}
+
 func TestContextProvider(t *testing.T) {
 	p := &contextProvider{}
 	sess := &types.SessionData{
@@ -48,15 +56,16 @@ func TestContextProvider(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*ContextData)
-	if data.Tokens != "600" {
-		t.Errorf("expected 600 tokens, got %s", data.Tokens)
+	ctx := contextValues(result)
+	if ctx["tokens"] != "600" {
+		t.Errorf("expected 600 tokens, got %s", ctx["tokens"])
 	}
-	if data.Size != "1M" {
-		t.Errorf("expected 1M size, got %s", data.Size)
+	if ctx["size"] != "1M" {
+		t.Errorf("expected 1M size, got %s", ctx["size"])
 	}
-	if *data.Percent != 36 {
-		t.Errorf("expected 36%%, got %d", *data.Percent)
+	pct := contextPercent(result)
+	if pct["used"] != 36 {
+		t.Errorf("expected 36%%, got %v", pct["used"])
 	}
 }
 
@@ -84,12 +93,12 @@ func TestContextProviderWithTotalTokens(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*ContextData)
-	if data.Input != "50K" {
-		t.Errorf("expected Input 50K, got %s", data.Input)
+	ctx := contextValues(result)
+	if ctx["input"] != "50K" {
+		t.Errorf("expected Input 50K, got %s", ctx["input"])
 	}
-	if data.Output != "8K" {
-		t.Errorf("expected Output 8K, got %s", data.Output)
+	if ctx["output"] != "8K" {
+		t.Errorf("expected Output 8K, got %s", ctx["output"])
 	}
 }
 
@@ -112,12 +121,12 @@ func TestContextProviderInputFallback(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*ContextData)
-	if data.Input != "600" {
-		t.Errorf("expected Input 600, got %s", data.Input)
+	ctx := contextValues(result)
+	if ctx["input"] != "600" {
+		t.Errorf("expected Input 600, got %s", ctx["input"])
 	}
-	if data.Output != "" {
-		t.Errorf("expected empty Output, got %s", data.Output)
+	if ctx["output"] != "" {
+		t.Errorf("expected empty Output, got %s", ctx["output"])
 	}
 }
 
@@ -138,9 +147,9 @@ func TestContextProviderRemaining(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*ContextData)
-	if data.Remaining == nil || *data.Remaining != 64 {
-		t.Errorf("expected remaining 64, got %v", data.Remaining)
+	pct := contextPercent(result)
+	if pct["remaining"] != 64 {
+		t.Errorf("expected remaining 64, got %v", pct["remaining"])
 	}
 }
 
@@ -153,9 +162,9 @@ func TestContextProviderNoRemaining(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*ContextData)
-	if data.Remaining != nil {
-		t.Errorf("expected nil remaining, got %v", data.Remaining)
+	pct := contextPercent(result)
+	if pct["remaining"] != 0 {
+		t.Errorf("expected remaining 0, got %v", pct["remaining"])
 	}
 }
 
@@ -171,8 +180,8 @@ func TestContextProviderZeroRemaining(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*ContextData)
-	if data.Remaining != nil {
-		t.Errorf("expected nil remaining for zero value with no usage, got %v", data.Remaining)
+	pct := contextPercent(result)
+	if pct["remaining"] != 0 {
+		t.Errorf("expected remaining 0 for zero value with no usage, got %v", pct["remaining"])
 	}
 }

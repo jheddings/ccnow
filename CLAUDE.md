@@ -4,33 +4,35 @@ Composable, spaceship-style statusline for Claude Code. Written in Go.
 
 ## Architecture
 
-Segment tree model: atomic segments (single data point) and composite segments
-(groups with `enabled` gating). Providers lazily fetch and cache external data.
-The main pipeline: parse CLI → load render tree → read stdin →
-resolve providers → depth-first render → styled output.
+Segment tree model: atomic nodes (`expr` or `value`) and composite nodes
+(groups with `enabled` gating and `when` conditions). Providers fetch external
+data and return nested maps. The main pipeline: parse CLI → load render tree →
+read stdin → resolve providers into env → depth-first render → styled output.
 
 **Key concepts**:
 
 - `SegmentNode` — configuration (what to render, how it looks)
-- `Segment` — runtime behavior (how to produce a value)
-- `Provider` — lazy, cached data fetcher (git, pwd, context)
-- Presets — Go functions that return `[]SegmentNode` trees
+- `expr` nodes — evaluate an expression against the provider env (e.g. `git.branch`)
+- `value` nodes — render static text (literals, separators, newlines)
+- `Provider` — data fetcher returning nested maps (e.g. `{"git": {"branch": "main"}}`)
+- `eval.Eval()` — cached expr-lang evaluation for both `expr` fields and `when` conditions
+- Presets — JSON files loaded via `embed.FS`
 
 ## First Principles
 
-- A segment renders a specific piece of data with style.
+- A node renders a specific piece of data with style.
 
 ## Project Structure
 
 - `main.go` — entry point, CLI (cobra), pipeline orchestration
-- `internal/types/` — shared types (`SegmentNode`, `Style`)
+- `internal/types/` — shared types (`SegmentNode`, `Style`, `ProviderResult`)
 - `internal/session/` — stdin JSON parsing
 - `internal/config/` — JSON config file parsing
-- `internal/segment/` — segment registry and implementations
+- `internal/eval/` — expr-lang compilation, caching, evaluation
 - `internal/provider/` — provider registry and implementations
-- `internal/render/` — tree traversal, provider resolution, output
+- `internal/render/` — tree traversal, env building, output
 - `internal/style/` — ANSI styling, color level control
-- `internal/preset/` — named layouts (default, minimal, full)
+- `internal/preset/` — named layouts (default, minimal, full, moonwalk, f1)
 
 ## Development
 
@@ -40,10 +42,8 @@ resolve providers → depth-first render → styled output.
 - `go test ./...` — run all tests
 - `go vet ./...` — static analysis
 
-**Adding a segment**: Add a case in `internal/segment/segment.go`'s registry.
-
-**Adding a provider**: Create `internal/provider/<name>.go` implementing `Provider`,
-register it in `internal/provider/provider.go`.
+**Adding a provider**: Create `internal/provider/<name>.go` implementing `DataProvider`,
+register it in `internal/provider/provider.go`. Return nested maps in `Values`.
 
 ## Commit Conventions
 
@@ -72,8 +72,8 @@ Examples: `feat/color-themes`, `fix/token-formatting`, `chore/update-deps`
 **Do**:
 
 - Follow TDD — write failing tests first, then implement
-- Keep segments focused — one data point per atomic segment
-- Return `""` from segments when there's no data (fail silent)
+- Keep nodes focused — one data point per atomic node
+- Return zero values from providers when there's no data (fail silent)
 - Run `go vet ./... && go test ./...` before merging
 - Work on feature branches
 
@@ -81,6 +81,6 @@ Examples: `feat/color-themes`, `fix/token-formatting`, `chore/update-deps`
 
 - Push directly to main
 - Never force-push to main
-- Skip tests for new segments or providers
-- Put styling logic in segments — segments return raw values, the renderer applies style
+- Skip tests for new providers
+- Put styling logic in providers — providers return raw values, the renderer applies style
 - Mutate global color state — use `style.SetColorLevel()` from `internal/style/`

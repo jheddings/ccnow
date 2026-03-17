@@ -6,6 +6,10 @@ import (
 	"github.com/jheddings/ccglow/internal/types"
 )
 
+func modelValues(result *types.ProviderResult) map[string]any {
+	return result.Values["model"].(map[string]any)
+}
+
 func TestModelProvider(t *testing.T) {
 	p := &modelProvider{}
 	sess := &types.SessionData{
@@ -18,9 +22,9 @@ func TestModelProvider(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*ModelData)
-	if *data.Name != "Opus 4.6" {
-		t.Errorf("expected Opus 4.6, got %s", *data.Name)
+	m := modelValues(result)
+	if m["name"] != "Opus 4.6" {
+		t.Errorf("expected Opus 4.6, got %s", m["name"])
 	}
 }
 
@@ -36,9 +40,9 @@ func TestModelProviderID(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*ModelData)
-	if data.ID == nil || *data.ID != "claude-opus-4-6[1m]" {
-		t.Errorf("expected claude-opus-4-6[1m], got %v", data.ID)
+	m := modelValues(result)
+	if m["id"] != "claude-opus-4-6[1m]" {
+		t.Errorf("expected claude-opus-4-6[1m], got %v", m["id"])
 	}
 }
 
@@ -51,11 +55,11 @@ func TestModelProviderNoModel(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := result.(*ModelData)
-	if data.ID != nil {
-		t.Errorf("expected nil ID, got %v", data.ID)
+	m := modelValues(result)
+	if m["id"] != "" {
+		t.Errorf("expected empty ID, got %v", m["id"])
 	}
-	if data.Name != nil {
-		t.Errorf("expected nil Name, got %v", data.Name)
+	if m["name"] != "" {
+		t.Errorf("expected empty Name, got %v", m["name"])
 	}
 }

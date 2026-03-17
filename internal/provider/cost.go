@@ -6,22 +6,18 @@ import (
 	"github.com/jheddings/ccglow/internal/types"
 )
 
-// CostData holds resolved session cost information.
-type CostData struct {
-	USD *string `segment:"cost.usd"`
-}
-
-func (p *costProvider) Fields() any { return &CostData{} }
-
 type costProvider struct{}
 
 func (p *costProvider) Name() string { return "cost" }
 
-func (p *costProvider) Resolve(session *types.SessionData) (any, error) {
-	data := &CostData{}
-	if session.Cost != nil {
-		usd := fmt.Sprintf("$%.2f", session.Cost.TotalCostUSD)
-		data.USD = &usd
+func (p *costProvider) Resolve(session *types.SessionData) (*types.ProviderResult, error) {
+	cost := map[string]any{
+		"usd": "",
 	}
-	return data, nil
+	if session.Cost != nil {
+		cost["usd"] = fmt.Sprintf("$%.2f", session.Cost.TotalCostUSD)
+	}
+	return &types.ProviderResult{
+		Values: map[string]any{"cost": cost},
+	}, nil
 }
