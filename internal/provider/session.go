@@ -13,8 +13,10 @@ func (p *sessionProvider) Name() string { return "session" }
 func (p *sessionProvider) Resolve(session *types.SessionData) (*types.ProviderResult, error) {
 	sess := map[string]any{
 		"duration": map[string]any{
-			"total": "",
-			"api":   "",
+			"total":     "",
+			"api":       "",
+			"total_min": 0,
+			"api_min":   0,
 		},
 		"lines-added":   0,
 		"lines-removed": 0,
@@ -36,6 +38,8 @@ func (p *sessionProvider) Resolve(session *types.SessionData) (*types.ProviderRe
 	dur := sess["duration"].(map[string]any)
 	dur["total"] = FormatDuration(session.Cost.TotalDurationMS)
 	dur["api"] = FormatDuration(session.Cost.TotalAPIDurationMS)
+	dur["total_min"] = int(session.Cost.TotalDurationMS / 60_000)
+	dur["api_min"] = int(session.Cost.TotalAPIDurationMS / 60_000)
 
 	if session.Cost.TotalLinesAdded > 0 {
 		sess["lines-added"] = session.Cost.TotalLinesAdded

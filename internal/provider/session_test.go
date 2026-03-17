@@ -101,3 +101,45 @@ func TestSessionProviderNoID(t *testing.T) {
 		t.Errorf("expected empty ID, got %v", s["id"])
 	}
 }
+
+func TestSessionProviderDurationMinutes(t *testing.T) {
+	p := &sessionProvider{}
+	sess := &types.SessionData{
+		CWD: "/tmp",
+		Cost: &types.CostInfo{
+			TotalDurationMS:    5400000, // 90 min
+			TotalAPIDurationMS: 522771,  // ~8 min
+		},
+	}
+
+	result, err := p.Resolve(sess)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	dur := sessionDuration(result)
+	if dur["total_min"] != 90 {
+		t.Errorf("expected total_min 90, got %v", dur["total_min"])
+	}
+	if dur["api_min"] != 8 {
+		t.Errorf("expected api_min 8, got %v", dur["api_min"])
+	}
+}
+
+func TestSessionProviderDurationMinutesNoCost(t *testing.T) {
+	p := &sessionProvider{}
+	sess := &types.SessionData{CWD: "/tmp"}
+
+	result, err := p.Resolve(sess)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	dur := sessionDuration(result)
+	if dur["total_min"] != 0 {
+		t.Errorf("expected total_min 0, got %v", dur["total_min"])
+	}
+	if dur["api_min"] != 0 {
+		t.Errorf("expected api_min 0, got %v", dur["api_min"])
+	}
+}
